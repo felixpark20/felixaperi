@@ -2,9 +2,9 @@ import { Badge } from "./ui/badge";
 import { Calendar, Eye } from "lucide-react";
 
 const FALLBACK_COLORS = [
-  "#3B82F6", "#10B981", "#8B5CF6", "#F59E0B",
-  "#EF4444", "#06B6D4", "#84CC16", "#F97316",
-  "#EC4899", "#6366F1",
+  "#93C5FD", "#86EFAC", "#C4B5FD", "#FDE68A",
+  "#FCA5A5", "#7DD3FC", "#BBF7D0", "#FED7AA",
+  "#FBCFE8", "#A5B4FC",
 ];
 
 interface HeroProps {

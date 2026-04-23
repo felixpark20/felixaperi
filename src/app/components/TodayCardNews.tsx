@@ -15,9 +15,24 @@ interface TodayCardNewsProps {
   onCardClick: (card: CardNews) => void;
 }
 
+// Parse the date from a card's title (e.g. "April 22nd, 2026" → Date)
+// Falls back to card.date field, then id
+const parseCardSortKey = (card: CardNews): number => {
+  if (card.title) {
+    const cleaned = card.title.replace(/(\d+)(st|nd|rd|th)/, "$1");
+    const d = new Date(cleaned);
+    if (!isNaN(d.getTime())) return d.getTime();
+  }
+  if (card.date) {
+    const d = new Date(card.date);
+    if (!isNaN(d.getTime())) return d.getTime();
+  }
+  return card.id;
+};
+
 export function TodayCardNews({ cardNews, onCardClick }: TodayCardNewsProps) {
-  // Show the single most recent card news (highest id = most recently added)
-  const latestCard = [...cardNews].sort((a, b) => b.id - a.id)[0];
+  // Show the single most recent card news by the date in its title
+  const latestCard = [...cardNews].sort((a, b) => parseCardSortKey(b) - parseCardSortKey(a))[0];
 
   if (!latestCard) return null;
 
