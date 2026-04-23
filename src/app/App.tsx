@@ -291,37 +291,27 @@ export default function App() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [showCardNews, setShowCardNews] = useState(false);
-  const [articles, setArticles] = useState(() => {
-    // Load from localStorage or use initial articles
-    const saved = localStorage.getItem("articles");
-    return saved ? JSON.parse(saved) : initialArticles;
-  });
-  const [cardNews, setCardNews] = useState(() => {
-    // Load from localStorage
-    const saved = localStorage.getItem("cardNews");
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [loading, setLoading] = useState(true);
+  const [articles, setArticles] = useState<any[]>([]);
+  const [cardNews, setCardNews] = useState<any[]>([]);
+  const [reports, setReports] = useState<any[]>([]);
 
-  const [reports, setReports] = useState(() => {
-    // Load from localStorage
-    const saved = localStorage.getItem("reports");
-    return saved ? JSON.parse(saved) : [];
-  });
-
-  // Save articles to localStorage whenever they change
+  // Fetch data from API on mount
   useEffect(() => {
-    localStorage.setItem("articles", JSON.stringify(articles));
-  }, [articles]);
-
-  // Save card news to localStorage whenever they change
-  useEffect(() => {
-    localStorage.setItem("cardNews", JSON.stringify(cardNews));
-  }, [cardNews]);
-
-  // Save reports to localStorage whenever they change
-  useEffect(() => {
-    localStorage.setItem("reports", JSON.stringify(reports));
-  }, [reports]);
+    Promise.all([
+      fetch('/api/articles').then(r => r.json()).catch(() => null),
+      fetch('/api/cardnews').then(r => r.json()).catch(() => null),
+      fetch('/api/reports').then(r => r.json()).catch(() => null),
+    ]).then(([fetchedArticles, fetchedCardNews, fetchedReports]) => {
+      setArticles(fetchedArticles?.length ? fetchedArticles : initialArticles);
+      setCardNews(fetchedCardNews || []);
+      setReports(fetchedReports || []);
+      setLoading(false);
+    }).catch(() => {
+      setArticles(initialArticles);
+      setLoading(false);
+    });
+  }, []);
 
   // Check if user is already logged in (session storage)
   useEffect(() => {
@@ -343,7 +333,7 @@ export default function App() {
     setIsAdmin(false);
   };
 
-  const handleAddArticle = (articleData: any) => {
+  const handleAddArticle = async (articleData: any) => {
     const newArticle = {
       ...articleData,
       id: Date.now(),
@@ -354,33 +344,30 @@ export default function App() {
       }),
       views: 0,
     };
-    setArticles([newArticle, ...articles]);
+    setArticles(prev => [newArticle, ...prev]);
+    await fetch('/api/articles', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(newArticle) }).catch(console.error);
   };
 
-  const handleEditArticle = (updatedArticle: any) => {
-    setArticles(
-      articles.map((a) =>
-        a.id === updatedArticle.id ? updatedArticle : a,
-      ),
-    );
+  const handleEditArticle = async (updatedArticle: any) => {
+    setArticles(prev => prev.map(a => a.id === updatedArticle.id ? updatedArticle : a));
+    await fetch('/api/articles', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(updatedArticle) }).catch(console.error);
   };
 
-  const handleDeleteArticle = (id: number) => {
-    setArticles(articles.filter((a) => a.id !== id));
+  const handleDeleteArticle = async (id: number) => {
+    setArticles(prev => prev.filter(a => a.id !== id));
+    await fetch(`/api/articles?id=${id}`, { method: 'DELETE' }).catch(console.error);
   };
 
-  const handleBulkDeleteArticles = (ids: number[]) => {
-    setArticles(articles.filter((a) => !ids.includes(a.id)));
+  const handleBulkDeleteArticles = async (ids: number[]) => {
+    setArticles(prev => prev.filter(a => !ids.includes(a.id)));
+    await fetch('/api/articles', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ids }) }).catch(console.error);
   };
 
-  const handleAddCard = (cardData: any) => {
+  const handleAddCard = async (cardData: any) => {
     if (cardData.id) {
       // Edit existing card
-      setCardNews(
-        cardNews.map((c) =>
-          c.id === cardData.id ? cardData : c
-        )
-      );
+      setCardNews(prev => prev.map(c => c.id === cardData.id ? cardData : c));
+      await fetch('/api/cardnews', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(cardData) }).catch(console.error);
     } else {
       // Add new card
       const newCard = {
@@ -393,19 +380,22 @@ export default function App() {
         }),
         views: 0,
       };
-      setCardNews([newCard, ...cardNews]);
+      setCardNews(prev => [newCard, ...prev]);
+      await fetch('/api/cardnews', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(newCard) }).catch(console.error);
     }
   };
 
-  const handleDeleteCard = (id: number) => {
-    setCardNews(cardNews.filter((c) => c.id !== id));
+  const handleDeleteCard = async (id: number) => {
+    setCardNews(prev => prev.filter(c => c.id !== id));
+    await fetch(`/api/cardnews?id=${id}`, { method: 'DELETE' }).catch(console.error);
   };
 
-  const handleBulkDeleteCards = (ids: number[]) => {
-    setCardNews(cardNews.filter((c) => !ids.includes(c.id)));
+  const handleBulkDeleteCards = async (ids: number[]) => {
+    setCardNews(prev => prev.filter(c => !ids.includes(c.id)));
+    await fetch('/api/cardnews', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ids }) }).catch(console.error);
   };
 
-  const handleAddReport = (reportData: any) => {
+  const handleAddReport = async (reportData: any) => {
     const newReport = {
       ...reportData,
       id: Date.now(),
@@ -415,31 +405,31 @@ export default function App() {
         year: "numeric",
       }),
     };
-    setReports([newReport, ...reports]);
+    setReports(prev => [newReport, ...prev]);
+    await fetch('/api/reports', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(newReport) }).catch(console.error);
   };
 
-  const handleEditReport = (updatedReport: any) => {
-    setReports(
-      reports.map((r) =>
-        r.id === updatedReport.id ? updatedReport : r,
-      ),
-    );
+  const handleEditReport = async (updatedReport: any) => {
+    setReports(prev => prev.map(r => r.id === updatedReport.id ? updatedReport : r));
+    await fetch('/api/reports', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(updatedReport) }).catch(console.error);
   };
 
-  const handleDeleteReport = (id: number) => {
-    setReports(reports.filter((r) => r.id !== id));
+  const handleDeleteReport = async (id: number) => {
+    setReports(prev => prev.filter(r => r.id !== id));
+    await fetch(`/api/reports?id=${id}`, { method: 'DELETE' }).catch(console.error);
   };
 
-  const handleBulkDeleteReports = (ids: number[]) => {
-    setReports(reports.filter((r) => !ids.includes(r.id)));
+  const handleBulkDeleteReports = async (ids: number[]) => {
+    setReports(prev => prev.filter(r => !ids.includes(r.id)));
+    await fetch('/api/reports', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ids }) }).catch(console.error);
   };
 
   const handleCardClick = (card: any) => {
-    const updatedCards = cardNews.map((c) =>
-      c.id === card.id ? { ...c, views: (c.views || 0) + 1 } : c
-    );
+    const newViews = (card.views || 0) + 1;
+    const updatedCards = cardNews.map(c => c.id === card.id ? { ...c, views: newViews } : c);
     setCardNews(updatedCards);
-    setSelectedCard({ ...card, views: (card.views || 0) + 1 });
+    setSelectedCard(updatedCards.find(c => c.id === card.id));
+    fetch('/api/cardnews', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: card.id, views: newViews }) }).catch(console.error);
   };
 
   const handleCardNewsClick = () => {
@@ -450,43 +440,27 @@ export default function App() {
   };
 
   const handleArticleClick = (article: any) => {
+    const newViews = (article.views || 0) + 1;
     // If it's an external link, open in new tab
     if (article.isExternal && article.externalLink) {
       window.open(article.externalLink, "_blank");
       // Still increment view count
-      const updatedArticles = articles.map((a) =>
-        a.id === article.id
-          ? { ...a, views: (a.views || 0) + 1 }
-          : a,
-      );
-      setArticles(updatedArticles);
+      setArticles(prev => prev.map(a => a.id === article.id ? { ...a, views: newViews } : a));
+      fetch('/api/articles', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: article.id, views: newViews }) }).catch(console.error);
       return;
     }
 
     // For regular articles, increment view count and show detail
-    const updatedArticles = articles.map((a) =>
-      a.id === article.id
-        ? { ...a, views: (a.views || 0) + 1 }
-        : a,
-    );
-    setArticles(updatedArticles);
-    setSelectedArticle({
-      ...article,
-      views: (article.views || 0) + 1,
-    });
+    setArticles(prev => prev.map(a => a.id === article.id ? { ...a, views: newViews } : a));
+    setSelectedArticle({ ...article, views: newViews });
+    fetch('/api/articles', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: article.id, views: newViews }) }).catch(console.error);
   };
 
   const handleReportClick = (report: any) => {
-    const updatedReports = reports.map((r) =>
-      r.id === report.id
-        ? { ...r, views: (r.views || 0) + 1 }
-        : r,
-    );
-    setReports(updatedReports);
-    setSelectedReport({
-      ...report,
-      views: (report.views || 0) + 1,
-    });
+    const newViews = (report.views || 0) + 1;
+    setReports(prev => prev.map(r => r.id === report.id ? { ...r, views: newViews } : r));
+    setSelectedReport({ ...report, views: newViews });
+    fetch('/api/reports', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: report.id, views: newViews }) }).catch(console.error);
   };
 
   const handleAdminClick = () => {
@@ -496,6 +470,14 @@ export default function App() {
       setIsAdmin(true); // This will trigger the login screen
     }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-slate-600">Loading...</div>
+      </div>
+    );
+  }
 
   // Admin Panel View - Show login if not authenticated
   if (isAdmin) {
