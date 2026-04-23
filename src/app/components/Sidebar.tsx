@@ -10,35 +10,24 @@ interface Article {
   isExternal?: boolean;
 }
 
-interface Report {
-  id: number;
-  title: string;
-  category: string;
-  date: string;
-  views?: number;
-}
-
 interface SidebarProps {
   articles: Article[];
-  reports?: Report[];
+  reports?: any[];
   onCategoryChange: (category: string) => void;
   onSubscribe?: (email: string) => void;
 }
 
-export function Sidebar({ articles, reports = [], onCategoryChange, onSubscribe }: SidebarProps) {
+export function Sidebar({ articles, onCategoryChange, onSubscribe }: SidebarProps) {
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
 
-  // Most recent columns (non-external, sorted by id desc)
-  const recentColumns = [...articles]
-    .filter(a => !a.isExternal)
-    .sort((a, b) => b.id - a.id)
+  // Popular posts: sorted by views descending
+  const popularPosts = [...articles]
+    .sort((a, b) => (b.views || 0) - (a.views || 0))
     .slice(0, 4);
 
-  // Most recent reports (sorted by id desc)
-  const recentReports = [...reports]
-    .sort((a, b) => b.id - a.id)
-    .slice(0, 4);
+  // Categories: unique categories from articles
+  const categories = Array.from(new Set(articles.map(a => a.category)));
 
   const handleSubscribe = (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,13 +48,13 @@ export function Sidebar({ articles, reports = [], onCategoryChange, onSubscribe 
 
   return (
     <div className="space-y-6">
-      {/* Recent Columns */}
+      {/* Popular Posts */}
       <Card className="p-6">
-        <h3 className="text-slate-900 mb-4">Recent Columns</h3>
+        <h3 className="text-slate-900 mb-4">Popular Posts</h3>
         <div className="space-y-4">
-          {recentColumns.length === 0 ? (
-            <p className="text-slate-500 text-sm">No columns yet</p>
-          ) : recentColumns.map((article) => (
+          {popularPosts.length === 0 ? (
+            <p className="text-slate-500 text-sm">No posts yet</p>
+          ) : popularPosts.map((article) => (
             <div
               key={article.id}
               className="pb-4 border-b border-slate-200 last:border-0 last:pb-0 cursor-pointer hover:text-slate-600 transition-colors"
@@ -75,32 +64,27 @@ export function Sidebar({ articles, reports = [], onCategoryChange, onSubscribe 
               <div className="flex items-center gap-2 text-sm text-slate-500">
                 <span>{article.category}</span>
                 <span className="text-slate-300">·</span>
-                <span>{article.date}</span>
+                <span>{(article.views || 0).toLocaleString()} views</span>
               </div>
             </div>
           ))}
         </div>
       </Card>
 
-      {/* Recent Reports */}
+      {/* Categories */}
       <Card className="p-6">
-        <h3 className="text-slate-900 mb-4">Recent Reports</h3>
-        <div className="space-y-4">
-          {recentReports.length === 0 ? (
-            <p className="text-slate-500 text-sm">No reports yet</p>
-          ) : recentReports.map((report) => (
-            <div
-              key={report.id}
-              className="pb-4 border-b border-slate-200 last:border-0 last:pb-0 cursor-pointer hover:text-slate-600 transition-colors"
-              onClick={() => onCategoryChange(report.category)}
+        <h3 className="text-slate-900 mb-4">Categories</h3>
+        <div className="space-y-2">
+          {categories.length === 0 ? (
+            <p className="text-slate-500 text-sm">No categories yet</p>
+          ) : categories.map((category) => (
+            <button
+              key={category}
+              className="w-full text-left px-3 py-2 rounded-md text-slate-700 hover:bg-slate-100 hover:text-slate-900 transition-colors text-sm"
+              onClick={() => onCategoryChange(category)}
             >
-              <p className="text-slate-900 mb-1 line-clamp-2">{report.title}</p>
-              <div className="flex items-center gap-2 text-sm text-slate-500">
-                <span>{report.category}</span>
-                <span className="text-slate-300">·</span>
-                <span>{report.date}</span>
-              </div>
-            </div>
+              {category}
+            </button>
           ))}
         </div>
       </Card>

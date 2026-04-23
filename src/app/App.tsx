@@ -630,7 +630,7 @@ export default function App() {
               </div>
             </div>
             <div className="border-t border-slate-800 mt-8 pt-8 text-center text-slate-400">
-              <p>&copy; 2025 APERI. All rights reserved.</p>
+              <p>&copy; 2026 APERI. All rights reserved.</p>
             </div>
           </div>
         </footer>
@@ -690,7 +690,7 @@ export default function App() {
               </div>
             </div>
             <div className="border-t border-slate-800 mt-8 pt-8 text-center text-slate-400">
-              <p>&copy; 2025 APERI. All rights reserved.</p>
+              <p>&copy; 2026 APERI. All rights reserved.</p>
             </div>
           </div>
         </footer>
@@ -711,10 +711,43 @@ export default function App() {
       />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <TodayCardNews
-          cardNews={cardNews}
-          onCardClick={handleCardClick}
-        />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
+          <div className="lg:col-span-2">
+            <TodayCardNews
+              cardNews={cardNews}
+              onCardClick={handleCardClick}
+            />
+          </div>
+          <div className="lg:col-span-1">
+            <div className="bg-white rounded-lg shadow-sm p-6 h-full">
+              <h2 className="text-slate-900 mb-4" style={{fontSize: "1.1rem"}}>Recent Posts</h2>
+              <div className="space-y-4">
+                {[
+                  ...articles.filter(a => !a.isExternal).map(a => ({ ...a, type: "article" as const })),
+                  ...reports.map(r => ({ ...r, type: "report" as const }))
+                ]
+                  .sort((a, b) => b.id - a.id)
+                  .slice(0, 6)
+                  .map((item) => (
+                    <div
+                      key={`${item.type}-${item.id}`}
+                      className="pb-4 border-b border-slate-100 last:border-0 last:pb-0 cursor-pointer hover:text-slate-600 transition-colors"
+                      onClick={() => item.type === "article" ? handleArticleClick(item) : handleReportClick(item)}
+                    >
+                      <span className={`text-xs font-medium px-2 py-0.5 rounded-full mb-1.5 inline-block ${item.type === "report" ? "bg-blue-100 text-blue-700" : "bg-slate-100 text-slate-600"}`}>
+                        {item.category}
+                      </span>
+                      <p className="text-slate-900 text-sm line-clamp-2">{item.title}</p>
+                      <p className="text-slate-400 text-xs mt-1">{item.date}</p>
+                    </div>
+                  ))}
+                {articles.length === 0 && reports.length === 0 && (
+                  <p className="text-slate-500 text-sm">No posts yet</p>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
 
         <Hero
           articles={articles}
@@ -771,7 +804,7 @@ export default function App() {
               </div>
             </div>
             <div className="border-t border-slate-800 mt-8 pt-8 text-center text-slate-400">
-              <p>&copy; 2025 APERI. All rights reserved.</p>
+              <p>&copy; 2026 APERI. All rights reserved.</p>
             </div>
           </div>
       </footer>

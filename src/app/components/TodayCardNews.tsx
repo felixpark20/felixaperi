@@ -35,7 +35,7 @@ export function TodayCardNews({ cardNews, onCardClick }: TodayCardNewsProps) {
   }
 
   return (
-    <section className="mb-12">
+    <section className="h-full">
       <div className="mb-6">
         <h2 className="text-slate-900 mb-2">{isToday ? "Today's Card News" : "Latest Card News"}</h2>
         <p className="text-slate-600">{isToday ? "Latest visual insights from today" : "Most recent visual insights"}</p>
