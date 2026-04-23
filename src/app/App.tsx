@@ -601,36 +601,36 @@ export default function App() {
 
         <footer className="bg-slate-900 text-white mt-20">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div>
                 <h3 className="mb-4">About</h3>
                 <p className="text-slate-400">
-                  In-depth analysis on politics, economics, and
-                  financial markets.
+                  In-depth analysis on politics, economics, and financial markets.
                 </p>
               </div>
               <div>
                 <h3 className="mb-4">Categories</h3>
                 <ul className="space-y-2 text-slate-400">
-                  <li>Politics</li>
-                  <li>Stocks & Markets</li>
-                  <li>Economics</li>
+                  <li>Daily Card News</li>
+                  <li>Columns — Politics / Stocks / Economics</li>
+                  <li>Reports — Company Analysis / General Report</li>
                 </ul>
               </div>
               <div>
                 <h3 className="mb-4">Connect</h3>
-                <p className="text-slate-400">
+                <p className="text-slate-400 mb-3">
                   Stay updated with the latest columns and analysis.
                 </p>
-                <a href="mailto:itsautumn@snu.ac.kr" className="text-slate-300 hover:text-white transition-colors mt-2 block">
-                  itsautumn@snu.ac.kr
-                </a>
+                <p className="text-slate-400">
+                  Email Address:{" "}
+                  <a href="mailto:itsautumn@snu.ac.kr" className="text-slate-200 hover:text-white transition-colors underline underline-offset-2">
+                    itsautumn@snu.ac.kr
+                  </a>
+                </p>
               </div>
             </div>
             <div className="border-t border-slate-800 mt-8 pt-8 text-center text-slate-400">
-              <p>
-                &copy; 2025 APERI. All rights reserved.
-              </p>
+              <p>&copy; 2025 APERI. All rights reserved.</p>
             </div>
           </div>
         </footer>
@@ -661,36 +661,36 @@ export default function App() {
 
         <footer className="bg-slate-900 text-white mt-20">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div>
                 <h3 className="mb-4">About</h3>
                 <p className="text-slate-400">
-                  In-depth analysis on politics, economics, and
-                  financial markets.
+                  In-depth analysis on politics, economics, and financial markets.
                 </p>
               </div>
               <div>
                 <h3 className="mb-4">Categories</h3>
                 <ul className="space-y-2 text-slate-400">
-                  <li>Politics</li>
-                  <li>Stocks & Markets</li>
-                  <li>Economics</li>
+                  <li>Daily Card News</li>
+                  <li>Columns — Politics / Stocks / Economics</li>
+                  <li>Reports — Company Analysis / General Report</li>
                 </ul>
               </div>
               <div>
                 <h3 className="mb-4">Connect</h3>
-                <p className="text-slate-400">
+                <p className="text-slate-400 mb-3">
                   Stay updated with the latest columns and analysis.
                 </p>
-                <a href="mailto:itsautumn@snu.ac.kr" className="text-slate-300 hover:text-white transition-colors mt-2 block">
-                  itsautumn@snu.ac.kr
-                </a>
+                <p className="text-slate-400">
+                  Email Address:{" "}
+                  <a href="mailto:itsautumn@snu.ac.kr" className="text-slate-200 hover:text-white transition-colors underline underline-offset-2">
+                    itsautumn@snu.ac.kr
+                  </a>
+                </p>
               </div>
             </div>
             <div className="border-t border-slate-800 mt-8 pt-8 text-center text-slate-400">
-              <p>
-                &copy; 2025 APERI. All rights reserved.
-              </p>
+              <p>&copy; 2025 APERI. All rights reserved.</p>
             </div>
           </div>
         </footer>
@@ -733,6 +733,7 @@ export default function App() {
           <aside className="lg:col-span-1">
             <Sidebar
               articles={articles}
+              reports={reports}
               onCategoryChange={setSelectedCategory}
             />
           </aside>
@@ -742,36 +743,37 @@ export default function App() {
       <footer className="bg-slate-900 text-white mt-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div>
-              <h3 className="mb-4">About</h3>
-              <p className="text-slate-400">
-                In-depth analysis on politics, economics, and
-                financial markets.
-              </p>
+              <div>
+                <h3 className="mb-4">About</h3>
+                <p className="text-slate-400">
+                  In-depth analysis on politics, economics, and financial markets.
+                </p>
+              </div>
+              <div>
+                <h3 className="mb-4">Categories</h3>
+                <ul className="space-y-2 text-slate-400">
+                  <li>Daily Card News</li>
+                  <li>Columns — Politics / Stocks / Economics</li>
+                  <li>Reports — Company Analysis / General Report</li>
+                </ul>
+              </div>
+              <div>
+                <h3 className="mb-4">Connect</h3>
+                <p className="text-slate-400 mb-3">
+                  Stay updated with the latest columns and analysis.
+                </p>
+                <p className="text-slate-400">
+                  Email Address:{" "}
+                  <a href="mailto:itsautumn@snu.ac.kr" className="text-slate-200 hover:text-white transition-colors underline underline-offset-2">
+                    itsautumn@snu.ac.kr
+                  </a>
+                </p>
+              </div>
             </div>
-            <div>
-              <h3 className="mb-4">Categories</h3>
-              <ul className="space-y-2 text-slate-400">
-                <li>Politics</li>
-                <li>Stocks & Markets</li>
-                <li>Economics</li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="mb-4">Connect</h3>
-              <p className="text-slate-400">
-                Stay updated with the latest columns and
-                analysis.
-              </p>
+            <div className="border-t border-slate-800 mt-8 pt-8 text-center text-slate-400">
+              <p>&copy; 2025 APERI. All rights reserved.</p>
             </div>
           </div>
-          <div className="border-t border-slate-800 mt-8 pt-8 text-center text-slate-400">
-            <p>
-              &copy; 2025 Political & Economic Commentary. All
-              rights reserved.
-            </p>
-          </div>
-        </div>
       </footer>
     </div>
   );

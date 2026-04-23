@@ -17,21 +17,30 @@ interface ArticleCardProps {
   onClick: () => void;
 }
 
+const FALLBACK_COLORS = [
+  "#3B82F6", "#10B981", "#8B5CF6", "#F59E0B",
+  "#EF4444", "#06B6D4", "#84CC16", "#F97316",
+  "#EC4899", "#6366F1",
+];
+
 export function ArticleCard({ article, onClick }: ArticleCardProps) {
-  const categoryColors: Record<string, string> = {
-    Politics: "bg-blue-100 text-blue-800",
-    Stocks: "bg-green-100 text-green-800",
-    Economics: "bg-purple-100 text-purple-800"
-  };
+  const fallbackColor = FALLBACK_COLORS[article.id % FALLBACK_COLORS.length];
 
   return (
     <article onClick={onClick} className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
-      <div className="h-48 bg-slate-200 overflow-hidden">
-        <img
-          src={article.image}
-          alt={article.title}
-          className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-        />
+      <div className="h-48 overflow-hidden" style={{ background: article.image ? undefined : fallbackColor }}>
+        {article.image ? (
+          <img
+            src={article.image}
+            alt={article.title}
+            className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+            onError={(e) => {
+              const target = e.currentTarget;
+              target.style.display = 'none';
+              if (target.parentElement) target.parentElement.style.background = fallbackColor;
+            }}
+          />
+        ) : null}
       </div>
       <div className="p-6">
         <div className="flex items-center justify-between mb-2">

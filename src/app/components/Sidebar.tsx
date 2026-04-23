@@ -1,44 +1,44 @@
 import { Card } from "./ui/card";
-import { TrendingUp } from "lucide-react";
 import { useState } from "react";
 
 interface Article {
   id: number;
   title: string;
   category: string;
+  date: string;
   views?: number;
   isExternal?: boolean;
 }
 
+interface Report {
+  id: number;
+  title: string;
+  category: string;
+  date: string;
+  views?: number;
+}
+
 interface SidebarProps {
   articles: Article[];
+  reports?: Report[];
   onCategoryChange: (category: string) => void;
   onSubscribe?: (email: string) => void;
 }
 
-export function Sidebar({ articles, onCategoryChange, onSubscribe }: SidebarProps) {
+export function Sidebar({ articles, reports = [], onCategoryChange, onSubscribe }: SidebarProps) {
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
 
-  // Calculate popular posts based on views
-  const popularPosts = articles
-    .filter(article => !article.isExternal && article.views !== undefined)
-    .sort((a, b) => (b.views || 0) - (a.views || 0))
+  // Most recent columns (non-external, sorted by id desc)
+  const recentColumns = [...articles]
+    .filter(a => !a.isExternal)
+    .sort((a, b) => b.id - a.id)
     .slice(0, 4);
 
-  // Calculate category counts
-  const categoryMap = articles.reduce((acc, article) => {
-    if (article.category === "Politics" || article.category === "Stocks" || article.category === "Economics") {
-      acc[article.category] = (acc[article.category] || 0) + 1;
-    }
-    return acc;
-  }, {} as Record<string, number>);
-
-  const categories = [
-    { name: "Politics", count: categoryMap["Politics"] || 0 },
-    { name: "Stocks", count: categoryMap["Stocks"] || 0 },
-    { name: "Economics", count: categoryMap["Economics"] || 0 }
-  ];
+  // Most recent reports (sorted by id desc)
+  const recentReports = [...reports]
+    .sort((a, b) => b.id - a.id)
+    .slice(0, 4);
 
   const handleSubscribe = (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,18 +46,12 @@ export function Sidebar({ articles, onCategoryChange, onSubscribe }: SidebarProp
       alert('Please enter your email');
       return;
     }
-
-    if (onSubscribe) {
-      onSubscribe(email);
-    }
-
-    // Save to localStorage
+    if (onSubscribe) onSubscribe(email);
     const subscribers = JSON.parse(localStorage.getItem('subscribers') || '[]');
     if (!subscribers.includes(email)) {
       subscribers.push(email);
       localStorage.setItem('subscribers', JSON.stringify(subscribers));
     }
-
     setSubscribed(true);
     setEmail("");
     alert('Successfully subscribed! You will receive notifications when new content is published.');
@@ -65,41 +59,47 @@ export function Sidebar({ articles, onCategoryChange, onSubscribe }: SidebarProp
 
   return (
     <div className="space-y-6">
-      {/* Popular Posts */}
+      {/* Recent Columns */}
       <Card className="p-6">
-        <div className="flex items-center gap-2 mb-4">
-          <TrendingUp className="w-5 h-5 text-slate-900" />
-          <h3 className="text-slate-900">Popular Posts</h3>
-        </div>
+        <h3 className="text-slate-900 mb-4">Recent Columns</h3>
         <div className="space-y-4">
-          {popularPosts.map((post) => (
+          {recentColumns.length === 0 ? (
+            <p className="text-slate-500 text-sm">No columns yet</p>
+          ) : recentColumns.map((article) => (
             <div
-              key={post.id}
+              key={article.id}
               className="pb-4 border-b border-slate-200 last:border-0 last:pb-0 cursor-pointer hover:text-slate-600 transition-colors"
+              onClick={() => onCategoryChange(article.category)}
             >
-              <p className="text-slate-900 mb-1">
-                {post.title}
-              </p>
-              <p className="text-slate-500">
-                {post.category}
-              </p>
+              <p className="text-slate-900 mb-1 line-clamp-2">{article.title}</p>
+              <div className="flex items-center gap-2 text-sm text-slate-500">
+                <span>{article.category}</span>
+                <span className="text-slate-300">·</span>
+                <span>{article.date}</span>
+              </div>
             </div>
           ))}
         </div>
       </Card>
 
-      {/* Categories */}
+      {/* Recent Reports */}
       <Card className="p-6">
-        <h3 className="mb-4 text-slate-900">Categories</h3>
-        <div className="space-y-3">
-          {categories.map((category) => (
+        <h3 className="text-slate-900 mb-4">Recent Reports</h3>
+        <div className="space-y-4">
+          {recentReports.length === 0 ? (
+            <p className="text-slate-500 text-sm">No reports yet</p>
+          ) : recentReports.map((report) => (
             <div
-              key={category.name}
-              onClick={() => onCategoryChange(category.name)}
-              className="flex justify-between items-center cursor-pointer hover:text-slate-600 transition-colors"
+              key={report.id}
+              className="pb-4 border-b border-slate-200 last:border-0 last:pb-0 cursor-pointer hover:text-slate-600 transition-colors"
+              onClick={() => onCategoryChange(report.category)}
             >
-              <span className="text-slate-900">{category.name}</span>
-              <span className="text-slate-500">({category.count})</span>
+              <p className="text-slate-900 mb-1 line-clamp-2">{report.title}</p>
+              <div className="flex items-center gap-2 text-sm text-slate-500">
+                <span>{report.category}</span>
+                <span className="text-slate-300">·</span>
+                <span>{report.date}</span>
+              </div>
             </div>
           ))}
         </div>

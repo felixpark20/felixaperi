@@ -23,22 +23,26 @@ export function TodayCardNews({ cardNews, onCardClick }: TodayCardNewsProps) {
     year: "numeric",
   });
 
-  // Filter card news from today
+  // Show today's card news first; fall back to latest 3 if none today
   const todayCards = cardNews.filter(card => card.date === today);
+  const displayCards = todayCards.length > 0
+    ? todayCards
+    : [...cardNews].sort((a, b) => b.id - a.id).slice(0, 3);
+  const isToday = todayCards.length > 0;
 
-  if (todayCards.length === 0) {
+  if (displayCards.length === 0) {
     return null;
   }
 
   return (
     <section className="mb-12">
       <div className="mb-6">
-        <h2 className="text-slate-900 mb-2">Today's Card News</h2>
-        <p className="text-slate-600">Latest visual insights from today</p>
+        <h2 className="text-slate-900 mb-2">{isToday ? "Today's Card News" : "Latest Card News"}</h2>
+        <p className="text-slate-600">{isToday ? "Latest visual insights from today" : "Most recent visual insights"}</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {todayCards.map((card) => (
+        {displayCards.map((card) => (
           <div
             key={card.id}
             onClick={() => onCardClick(card)}
