@@ -3,6 +3,35 @@ import { Button } from "./ui/button";
 import { Card } from "./ui/card";
 import { Upload, X, Trash2, Eye, Pencil, FileText } from "lucide-react";
 
+// Compress image to reduce localStorage usage
+const compressImage = (file: File, maxWidth = 1200, quality = 0.75): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        let width = img.width;
+        let height = img.height;
+        if (width > maxWidth) {
+          height = Math.round((height * maxWidth) / width);
+          width = maxWidth;
+        }
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) { reject(new Error("Canvas not supported")); return; }
+        ctx.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL("image/jpeg", quality));
+      };
+      img.onerror = reject;
+      img.src = e.target?.result as string;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+};
+
 interface CardNews {
   id: number;
   images: string[];
@@ -34,21 +63,8 @@ export function CardNewsUpload({ cardNews, onAddCard, onDeleteCard, onBulkDelete
     if (!files) return;
 
     const fileArray = Array.from(files);
-    const imagePromises = fileArray.map((file) => {
-      return new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          if (e.target?.result) {
-            resolve(e.target.result as string);
-          }
-        };
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-    });
-
     try {
-      const imageDataUrls = await Promise.all(imagePromises);
+      const imageDataUrls = await Promise.all(fileArray.map((file) => compressImage(file)));
       setImages([...images, ...imageDataUrls]);
     } catch (error) {
       alert('Error reading files. Please try again.');
