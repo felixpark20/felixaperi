@@ -36,7 +36,7 @@ export function Navigation({ selectedCategory, onCategoryChange, onAdminClick, o
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
             <h1 className="text-slate-900 cursor-pointer" onClick={() => onCategoryChange("All")}>
-              READ IN
+              APERI
             </h1>
           </div>
 
@@ -105,7 +105,7 @@ export function Navigation({ selectedCategory, onCategoryChange, onAdminClick, o
               <Settings className="w-4 h-4 mr-2" />
               Admin
             </Button>
-            <Button variant="default">Subscribe</Button>
+            <Button variant="default" onClick={() => document.getElementById('subscribe-section')?.scrollIntoView({ behavior: 'smooth' })}>Subscribe</Button>
           </div>
 
           {/* Mobile menu button */}
@@ -184,7 +184,7 @@ export function Navigation({ selectedCategory, onCategoryChange, onAdminClick, o
                 <Settings className="w-4 h-4 mr-2" />
                 Admin
               </Button>
-              <Button variant="default" className="w-full">
+              <Button variant="default" className="w-full" onClick={() => { setIsOpen(false); setTimeout(() => document.getElementById('subscribe-section')?.scrollIntoView({ behavior: 'smooth' }), 100); }}>
                 Subscribe
               </Button>
             </div>

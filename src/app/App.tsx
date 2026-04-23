@@ -620,15 +620,16 @@ export default function App() {
               <div>
                 <h3 className="mb-4">Connect</h3>
                 <p className="text-slate-400">
-                  Stay updated with the latest columns and
-                  analysis.
+                  Stay updated with the latest columns and analysis.
                 </p>
+                <a href="mailto:itsautumn@snu.ac.kr" className="text-slate-300 hover:text-white transition-colors mt-2 block">
+                  itsautumn@snu.ac.kr
+                </a>
               </div>
             </div>
             <div className="border-t border-slate-800 mt-8 pt-8 text-center text-slate-400">
               <p>
-                &copy; 2025 Political & Economic Commentary. All
-                rights reserved.
+                &copy; 2025 APERI. All rights reserved.
               </p>
             </div>
           </div>
@@ -674,15 +675,16 @@ export default function App() {
               <div>
                 <h3 className="mb-4">Connect</h3>
                 <p className="text-slate-400">
-                  Stay updated with the latest columns and
-                  analysis.
+                  Stay updated with the latest columns and analysis.
                 </p>
+                <a href="mailto:itsautumn@snu.ac.kr" className="text-slate-300 hover:text-white transition-colors mt-2 block">
+                  itsautumn@snu.ac.kr
+                </a>
               </div>
             </div>
             <div className="border-t border-slate-800 mt-8 pt-8 text-center text-slate-400">
               <p>
-                &copy; 2025 Political & Economic Commentary. All
-                rights reserved.
+                &copy; 2025 APERI. All rights reserved.
               </p>
             </div>
           </div>

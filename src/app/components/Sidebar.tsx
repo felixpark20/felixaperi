@@ -106,7 +106,7 @@ export function Sidebar({ articles, onCategoryChange, onSubscribe }: SidebarProp
       </Card>
 
       {/* Newsletter */}
-      <Card className="p-6 bg-slate-900 text-white">
+      <Card id="subscribe-section" className="p-6 bg-slate-900 text-white">
         <h3 className="mb-2">Stay Informed</h3>
         <p className="text-slate-300 mb-4">
           Get notified when new columns and reports are published.
