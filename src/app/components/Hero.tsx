@@ -22,16 +22,16 @@ export function Hero({ articles, onArticleClick }: HeroProps) {
 
   if (!mostPopular) {
     return (
-      <div className="relative bg-white rounded-lg shadow-md overflow-hidden p-12 text-center">
-        <h2 className="mb-4 text-slate-900">No articles yet</h2>
-        <p className="text-slate-600">Create your first article in the admin panel</p>
+      <div className="relative bg-white rounded-lg shadow-md overflow-hidden p-12 text-center dark:bg-slate-800">
+        <h2 className="mb-4 text-slate-900 dark:text-slate-100">No articles yet</h2>
+        <p className="text-slate-600 dark:text-slate-300">Create your first article in the admin panel</p>
       </div>
     );
   }
 
   return (
     <div 
-      className="relative bg-white rounded-lg shadow-md overflow-hidden cursor-pointer hover:shadow-lg transition-shadow"
+      className="relative bg-white rounded-lg shadow-md overflow-hidden cursor-pointer hover:shadow-lg transition-shadow dark:bg-slate-800"
       onClick={() => onArticleClick(mostPopular)}
     >
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -39,20 +39,20 @@ export function Hero({ articles, onArticleClick }: HeroProps) {
           <Badge className="w-fit mb-4" variant="secondary">
             Most Popular
           </Badge>
-          <h2 className="mb-4 text-slate-900">
+          <h2 className="mb-4 text-slate-900 dark:text-slate-100">
             {mostPopular.title}
           </h2>
-          <p className="text-slate-600 mb-6">
+          <p className="text-slate-600 mb-6 dark:text-slate-300">
             {mostPopular.excerpt}
           </p>
-          <div className="flex flex-wrap items-center gap-4 text-sm text-slate-500">
+          <div className="flex flex-wrap items-center gap-4 text-sm text-slate-500 dark:text-slate-400">
             <div className="flex items-center gap-2 whitespace-nowrap">
               <Calendar className="w-4 h-4 flex-shrink-0" />
               <span>{mostPopular.date}</span>
             </div>
-            <span className="text-slate-300">•</span>
+            <span className="text-slate-300 dark:text-slate-600">•</span>
             <span className="whitespace-nowrap">{mostPopular.readTime}</span>
-            <span className="text-slate-300">•</span>
+            <span className="text-slate-300 dark:text-slate-600">•</span>
             <div className="flex items-center gap-2 whitespace-nowrap">
               <Eye className="w-4 h-4 flex-shrink-0" />
               <span>{mostPopular.views?.toLocaleString() || 0} views</span>

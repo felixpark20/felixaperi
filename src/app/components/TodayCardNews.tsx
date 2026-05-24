@@ -39,15 +39,15 @@ export function TodayCardNews({ cardNews, onCardClick }: TodayCardNewsProps) {
   return (
     <section className="h-full flex flex-col">
       <div className="mb-4">
-        <h2 className="text-slate-900 mb-1" style={{ fontSize: "1.1rem" }}>Daily Card News</h2>
-        <p className="text-slate-500 text-sm">Latest visual brief</p>
+        <h2 className="text-slate-900 mb-1 dark:text-slate-100" style={{ fontSize: "1.1rem" }}>Daily Card News</h2>
+        <p className="text-slate-500 text-sm dark:text-slate-400">Latest visual brief</p>
       </div>
 
       <div
         onClick={() => onCardClick(latestCard)}
-        className="group cursor-pointer bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 flex-1 flex flex-col"
+        className="group cursor-pointer bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 flex-1 flex flex-col dark:bg-slate-800"
       >
-        <div className="aspect-square bg-slate-100 overflow-hidden relative">
+        <div className="aspect-square bg-slate-100 overflow-hidden relative dark:bg-slate-700">
           <img
             src={(latestCard.images || [])[0]}
             alt={latestCard.title}
@@ -65,8 +65,8 @@ export function TodayCardNews({ cardNews, onCardClick }: TodayCardNewsProps) {
           )}
         </div>
         <div className="p-4 flex-1">
-          <h3 className="text-slate-900 mb-2 font-semibold">{latestCard.title}</h3>
-          <div className="flex items-center justify-between text-sm text-slate-500">
+          <h3 className="text-slate-900 mb-2 font-semibold dark:text-slate-100">{latestCard.title}</h3>
+          <div className="flex items-center justify-between text-sm text-slate-500 dark:text-slate-400">
             <div className="flex items-center gap-1">
               <Calendar className="w-3 h-3" />
               <span>{latestCard.date}</span>

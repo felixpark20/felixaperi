@@ -4,3 +4,12 @@
 
 [functions]
   node_bundler = "esbuild"
+
+# SPA fallback: serve index.html for client-side routes (e.g. /cardnews,
+# /columns, /reports) so deep links and refreshes don't 404.
+# No `force = true`, so real static files (incl. /magazine/) and the
+# /api/* functions are served first; this only catches unmatched paths.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

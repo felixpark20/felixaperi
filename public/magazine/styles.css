@@ -1,0 +1,559 @@
+/* ============================================
+   이생 — Magazine base styles
+   ============================================ */
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #1c1b18;
+  font-family: var(--font-body);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+#root { width: 100%; height: 100%; }
+
+/* ============================================
+   PALETTES — toggled via [data-palette] on body
+   ============================================ */
+
+body[data-palette="sand"] {
+  --bg: #FAF7F2;
+  --bg-soft: #F2EDE3;
+  --bg-deep: #ECE3D2;
+  --ink: #2C2A26;
+  --ink-soft: #5b574e;
+  --accent: #D97757;
+  --accent-soft: #E8B96B;
+  --rule: #2C2A26;
+  --paper-shadow: 0 30px 80px -30px rgba(60,40,20,.35);
+}
+
+body[data-palette="stone"] {
+  --bg: #FFFFFF;
+  --bg-soft: #F4F2EE;
+  --bg-deep: #E8E4DD;
+  --ink: #1A1A1A;
+  --ink-soft: #6b6760;
+  --accent: #1A1A1A;
+  --accent-soft: #A89F8E;
+  --rule: #1A1A1A;
+  --paper-shadow: 0 30px 80px -30px rgba(0,0,0,.25);
+}
+
+body[data-palette="mint"] {
+  --bg: #F4F8FB;
+  --bg-soft: #E7F0F5;
+  --bg-deep: #D5E7EE;
+  --ink: #1F3340;
+  --ink-soft: #557184;
+  --accent: #2F7FA8;
+  --accent-soft: #B9DCC9;
+  --rule: #1F3340;
+  --paper-shadow: 0 30px 80px -30px rgba(20,60,90,.30);
+}
+
+/* ============================================
+   TYPE PAIRINGS — toggled via [data-type] on body
+   ============================================ */
+
+body[data-type="editorial"] {
+  --font-display: "Gowun Batang", "Noto Serif KR", serif;
+  --font-body: "Pretendard", "Noto Sans KR", -apple-system, sans-serif;
+  --font-label: "Pretendard", sans-serif;
+  --display-leading: 1.08;
+  --display-tracking: -0.02em;
+}
+
+body[data-type="modern"] {
+  --font-display: "Pretendard", "Noto Sans KR", sans-serif;
+  --font-body: "Pretendard", "Noto Sans KR", sans-serif;
+  --font-label: "IBM Plex Mono", monospace;
+  --display-leading: 1.0;
+  --display-tracking: -0.04em;
+}
+
+body[data-type="playful"] {
+  --font-display: "Gowun Dodum", "Noto Sans KR", sans-serif;
+  --font-body: "IBM Plex Sans KR", "Noto Sans KR", sans-serif;
+  --font-label: "IBM Plex Mono", monospace;
+  --display-leading: 1.05;
+  --display-tracking: -0.01em;
+}
+
+/* ============================================
+   PAGE / SPREAD SHELL
+   ============================================ */
+
+.stage {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: #1c1b18;
+  overflow: hidden;
+}
+
+.spread-wrap {
+  position: relative;
+  width: min(95vw, calc(95vh * 1.6));
+  aspect-ratio: 1.6 / 1;
+  background: var(--bg);
+  color: var(--ink);
+  box-shadow: var(--paper-shadow);
+  overflow: hidden;
+  transition: background-color .4s ease, color .4s ease;
+}
+
+.spread {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background: var(--bg);
+  color: var(--ink);
+}
+
+/* center gutter line */
+.spread::before {
+  content: "";
+  position: absolute;
+  top: 6%;
+  bottom: 6%;
+  left: 50%;
+  width: 1px;
+  background: color-mix(in oklab, var(--ink) 8%, transparent);
+  pointer-events: none;
+}
+
+.page {
+  position: relative;
+  padding: 5.5% 5.5%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.page.no-pad { padding: 0; }
+
+/* page number / footer */
+.page-foot {
+  position: absolute;
+  bottom: 18px;
+  left: 0; right: 0;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 5.5%;
+  font-family: var(--font-label);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+/* ============================================
+   TYPOGRAPHY ATOMS
+   ============================================ */
+
+.eyebrow {
+  font-family: var(--font-label);
+  font-size: 11px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.eyebrow.accent { color: var(--accent); }
+
+.kicker {
+  font-family: var(--font-label);
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.display {
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: var(--display-leading);
+  letter-spacing: var(--display-tracking);
+  color: var(--ink);
+}
+
+.body-serif, .body {
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.75;
+  color: var(--ink);
+  text-wrap: pretty;
+}
+
+.dropcap::first-letter {
+  font-family: var(--font-display);
+  font-size: 4.5em;
+  float: left;
+  line-height: 0.9;
+  padding: 4px 8px 0 0;
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.rule {
+  height: 1px;
+  background: var(--rule);
+  width: 100%;
+}
+
+.rule.thick { height: 3px; }
+
+.col-2 {
+  column-count: 2;
+  column-gap: 24px;
+  column-rule: 1px solid color-mix(in oklab, var(--ink) 10%, transparent);
+}
+
+/* ============================================
+   NAV CHROME
+   ============================================ */
+
+.nav-chrome {
+  position: fixed;
+  bottom: 22px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 16px;
+  background: rgba(28,27,24,.85);
+  backdrop-filter: blur(20px);
+  border-radius: 999px;
+  color: #f5f2ec;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  z-index: 50;
+  user-select: none;
+}
+
+.nav-chrome button {
+  appearance: none;
+  background: rgba(255,255,255,.08);
+  border: none;
+  color: inherit;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: background .15s ease;
+}
+.nav-chrome button:hover { background: rgba(255,255,255,.18); }
+.nav-chrome button:disabled { opacity: .35; cursor: default; }
+
+.nav-chrome .dots {
+  display: flex;
+  gap: 6px;
+  padding: 0 6px;
+}
+.nav-chrome .dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: rgba(255,255,255,.25);
+  transition: all .2s ease;
+  cursor: pointer;
+}
+.nav-chrome .dot.active {
+  background: #f5f2ec;
+  width: 18px;
+  border-radius: 4px;
+}
+
+.nav-chrome .count {
+  font-variant-numeric: tabular-nums;
+  opacity: .7;
+  min-width: 40px;
+  text-align: center;
+}
+
+/* ============================================
+   PAGE-FLIP ANIMATION
+   ============================================ */
+
+.flip-stage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  perspective: 2400px;
+}
+
+.spread-layer {
+  position: absolute;
+  inset: 0;
+  transform-origin: center center;
+  will-change: transform, opacity;
+}
+
+@keyframes flip-in-right {
+  from { transform: translateX(8%) scale(.98); opacity: 0; }
+  to   { transform: translateX(0) scale(1); opacity: 1; }
+}
+@keyframes flip-in-left {
+  from { transform: translateX(-8%) scale(.98); opacity: 0; }
+  to   { transform: translateX(0) scale(1); opacity: 1; }
+}
+@keyframes flip-out-left {
+  from { transform: translateX(0) scale(1); opacity: 1; }
+  to   { transform: translateX(-8%) scale(.98); opacity: 0; }
+}
+@keyframes flip-out-right {
+  from { transform: translateX(0) scale(1); opacity: 1; }
+  to   { transform: translateX(8%) scale(.98); opacity: 0; }
+}
+
+.flip-enter-fwd { animation: flip-in-right .55s cubic-bezier(.7,0,.2,1) both; }
+.flip-enter-bwd { animation: flip-in-left  .55s cubic-bezier(.7,0,.2,1) both; }
+.flip-exit-fwd  { animation: flip-out-left  .55s cubic-bezier(.7,0,.2,1) both; }
+.flip-exit-bwd  { animation: flip-out-right .55s cubic-bezier(.7,0,.2,1) both; }
+
+/* Page curl shadow during flip */
+.curl-shadow {
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 60px;
+  pointer-events: none;
+  z-index: 5;
+}
+.curl-shadow.right {
+  right: 50%;
+  background: linear-gradient(to left, rgba(0,0,0,.18), transparent);
+}
+
+/* ============================================
+   IMAGE WELL
+   ============================================ */
+
+.img-well {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: var(--bg-deep);
+  overflow: hidden;
+}
+.img-well img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.img-well .caption {
+  position: absolute;
+  bottom: 12px; left: 12px; right: 12px;
+  font-family: var(--font-label);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #fff;
+  text-shadow: 0 1px 4px rgba(0,0,0,.4);
+}
+
+/* ============================================
+   COVER-specific
+   ============================================ */
+
+.cover-mast {
+  font-family: var(--font-display);
+  font-weight: 800;
+  line-height: 0.85;
+  letter-spacing: -0.04em;
+  color: var(--ink);
+  font-size: clamp(80px, 14vw, 240px);
+}
+
+.cover-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  border-top: 2px solid var(--ink);
+  border-bottom: 1px solid var(--ink);
+  padding: 8px 0;
+  font-family: var(--font-label);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+/* ============================================
+   TOC
+   ============================================ */
+
+.toc-row {
+  display: grid;
+  grid-template-columns: 56px 1fr 60px;
+  align-items: baseline;
+  gap: 16px;
+  padding: 14px 0;
+  border-bottom: 1px solid color-mix(in oklab, var(--ink) 15%, transparent);
+}
+.toc-row:last-child { border-bottom: none; }
+.toc-row .num {
+  font-family: var(--font-label);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: var(--accent);
+}
+.toc-row .ttl {
+  font-family: var(--font-display);
+  font-size: 18px;
+  line-height: 1.25;
+  color: var(--ink);
+}
+.toc-row .ttl small {
+  display: block;
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--ink-soft);
+  margin-top: 2px;
+  letter-spacing: 0;
+}
+.toc-row .pg {
+  font-family: var(--font-label);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-align: right;
+  color: var(--ink-soft);
+}
+
+/* ============================================
+   QUOTE PULL
+   ============================================ */
+
+.pull-quote {
+  font-family: var(--font-display);
+  font-size: 28px;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--accent);
+  padding: 16px 0;
+  border-top: 1px solid var(--ink);
+  border-bottom: 1px solid var(--ink);
+  margin: 20px 0;
+}
+
+/* ============================================
+   NUMBERS / DATA piece
+   ============================================ */
+
+.stat-card {
+  border-top: 1px solid var(--ink);
+  padding: 14px 0 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.stat-card .num {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 56px;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+}
+.stat-card .num .unit {
+  font-size: 22px;
+  color: var(--accent);
+  margin-left: 4px;
+}
+.stat-card .lbl {
+  font-family: var(--font-label);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+.stat-card .desc {
+  font-size: 12px;
+  color: var(--ink);
+  line-height: 1.5;
+  margin-top: 4px;
+}
+
+/* ============================================
+   Q&A
+   ============================================ */
+
+.qa { display: flex; flex-direction: column; gap: 14px; }
+.qa .q {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 1.4;
+  color: var(--accent);
+  display: grid;
+  grid-template-columns: 22px 1fr;
+  gap: 8px;
+}
+.qa .q::before {
+  content: "Q";
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--accent);
+}
+.qa .a {
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--ink);
+  display: grid;
+  grid-template-columns: 22px 1fr;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.qa .a::before {
+  content: "A";
+  font-family: var(--font-label);
+  font-weight: 700;
+  font-size: 12px;
+  color: var(--ink-soft);
+  letter-spacing: 0.1em;
+}
+
+/* ============================================
+   misc helpers
+   ============================================ */
+
+.tag {
+  display: inline-block;
+  font-family: var(--font-label);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border: 1px solid var(--ink);
+  color: var(--ink);
+  border-radius: 999px;
+}
+.tag.accent {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--bg);
+}
+
+.grid-photos {
+  display: grid;
+  gap: 8px;
+}
+
+.swatch-stack {
+  display: flex;
+  gap: 4px;
+}
+.swatch-stack span {
+  width: 18px; height: 18px; border-radius: 50%;
+  display: block;
+}

@@ -14,7 +14,7 @@ export function ArticleGrid({ selectedCategory, onArticleClick, articles }: Arti
 
   return (
     <div>
-      <h2 className="mb-6 text-slate-900">
+      <h2 className="mb-6 text-slate-900 dark:text-slate-100">
         {isAll ? "Latest Columns" : `${selectedCategory} Columns`}
       </h2>
       {filteredArticles.length > 0 ? (
@@ -24,7 +24,7 @@ export function ArticleGrid({ selectedCategory, onArticleClick, articles }: Arti
           ))}
         </div>
       ) : (
-        <p className="text-slate-500">No articles found in this category.</p>
+        <p className="text-slate-500 dark:text-slate-400">No articles found in this category.</p>
       )}
     </div>
   );

@@ -36,7 +36,7 @@ export function ArticleDetail({ article, onBack }: ArticleDetailProps) {
     if (article.content) {
       const paragraphs = article.content.split('\n\n');
       return paragraphs.map((paragraph, index) => (
-        <p key={index} className="mb-6 text-slate-700">
+        <p key={index} className="mb-6 text-slate-700 dark:text-slate-200">
           {paragraph}
         </p>
       ));
@@ -61,7 +61,7 @@ export function ArticleDetail({ article, onBack }: ArticleDetailProps) {
             demographic groups. Healthcare access and education funding also resonated strongly with 
             suburban voters who proved decisive in several contested races.
           </p>
-          <h3 className="mb-4 text-slate-900">Legislative Implications</h3>
+          <h3 className="mb-4 text-slate-900 dark:text-slate-100">Legislative Implications</h3>
           <p className="mb-6">
             With the new congressional makeup, we can expect significant shifts in committee leadership 
             and agenda-setting power. Infrastructure projects, tax policy, and regulatory frameworks 
@@ -91,7 +91,7 @@ export function ArticleDetail({ article, onBack }: ArticleDetailProps) {
             growth potential justify premium valuations, historical precedent suggests caution when 
             multiples extend too far beyond long-term averages.
           </p>
-          <h3 className="mb-4 text-slate-900">Market Drivers and Risks</h3>
+          <h3 className="mb-4 text-slate-900 dark:text-slate-100">Market Drivers and Risks</h3>
           <p className="mb-6">
             Several factors are driving the current rally. Strong earnings reports, optimistic guidance, 
             and enthusiasm around artificial intelligence applications have all contributed to investor 
@@ -120,7 +120,7 @@ export function ArticleDetail({ article, onBack }: ArticleDetailProps) {
             costs remain elevated. The shift toward nearshoring and supply chain resilience is 
             reshaping international trade patterns in fundamental ways.
           </p>
-          <h3 className="mb-4 text-slate-900">Inflationary Pressures</h3>
+          <h3 className="mb-4 text-slate-900 dark:text-slate-100">Inflationary Pressures</h3>
           <p className="mb-6">
             The relationship between supply chain normalization and inflation is complex. While improved 
             goods availability should exert downward pressure on prices, structural changes in sourcing 
@@ -139,9 +139,9 @@ export function ArticleDetail({ article, onBack }: ArticleDetailProps) {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 pb-12">
+    <div className="min-h-screen bg-slate-50 pb-12 dark:bg-slate-900">
       {/* Header */}
-      <div className="bg-white border-b border-slate-200">
+      <div className="bg-white border-b border-slate-200 dark:bg-slate-800 dark:border-slate-700">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <Button
             variant="ghost"
@@ -156,24 +156,24 @@ export function ArticleDetail({ article, onBack }: ArticleDetailProps) {
             {article.category}
           </Badge>
           
-          <h1 className="mb-6 text-slate-900">
+          <h1 className="mb-6 text-slate-900 dark:text-slate-100">
             {article.title}
           </h1>
           
           <div className="flex items-center justify-between flex-wrap gap-4">
-            <div className="flex flex-wrap items-center gap-4 text-sm text-slate-500">
+            <div className="flex flex-wrap items-center gap-4 text-sm text-slate-500 dark:text-slate-400">
               <div className="flex items-center gap-2 whitespace-nowrap">
                 <Calendar className="w-4 h-4 flex-shrink-0" />
                 <span>{article.date}</span>
               </div>
-              <span className="text-slate-300">•</span>
+              <span className="text-slate-300 dark:text-slate-600">•</span>
               <div className="flex items-center gap-2 whitespace-nowrap">
                 <Clock className="w-4 h-4 flex-shrink-0" />
                 <span>{article.readTime}</span>
               </div>
               {article.views !== undefined && (
                 <>
-                  <span className="text-slate-300">•</span>
+                  <span className="text-slate-300 dark:text-slate-600">•</span>
                   <div className="flex items-center gap-2 whitespace-nowrap">
                     <Eye className="w-4 h-4 flex-shrink-0" />
                     <span>{article.views.toLocaleString()} views</span>
@@ -209,7 +209,7 @@ export function ArticleDetail({ article, onBack }: ArticleDetailProps) {
         
         {/* Article Body */}
         <div className="prose prose-slate max-w-none">
-          <p className="text-slate-600 mb-8">
+          <p className="text-slate-600 mb-8 dark:text-slate-300">
             {article.excerpt}
           </p>
           
@@ -217,10 +217,10 @@ export function ArticleDetail({ article, onBack }: ArticleDetailProps) {
         </div>
         
         {/* Author Bio */}
-        <div className="mt-12 p-6 bg-white rounded-lg border border-slate-200">
+        <div className="mt-12 p-6 bg-white rounded-lg border border-slate-200 dark:bg-slate-800 dark:border-slate-700">
           <div>
-            <h4 className="text-slate-900 mb-2">박정규</h4>
-            <p className="text-slate-600">
+            <h4 className="text-slate-900 mb-2 dark:text-slate-100">박정규</h4>
+            <p className="text-slate-600 dark:text-slate-300">
               서울대학교 경제학부생
             </p>
           </div>

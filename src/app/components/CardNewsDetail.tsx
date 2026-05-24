@@ -31,7 +31,7 @@ export function CardNewsDetail({ card, onBack }: CardNewsDetailProps) {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Button
           variant="ghost"
@@ -42,8 +42,8 @@ export function CardNewsDetail({ card, onBack }: CardNewsDetailProps) {
           Back to Card News
         </Button>
 
-        <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-          <div className="relative aspect-square max-h-[600px] bg-slate-100 overflow-hidden mx-auto">
+        <div className="bg-white rounded-lg shadow-sm overflow-hidden dark:bg-slate-800">
+          <div className="relative aspect-square max-h-[600px] bg-slate-100 overflow-hidden mx-auto dark:bg-slate-700">
             {images.length > 0 && (
               <img
                 src={images[currentPage]}
@@ -75,7 +75,7 @@ export function CardNewsDetail({ card, onBack }: CardNewsDetailProps) {
           </div>
 
           {totalPages > 1 && (
-            <div className="p-4 border-t border-slate-200 overflow-x-auto">
+            <div className="p-4 border-t border-slate-200 overflow-x-auto dark:border-slate-700">
               <div className="flex gap-2 justify-center">
                 {images.map((img, idx) => (
                   <button
@@ -84,7 +84,7 @@ export function CardNewsDetail({ card, onBack }: CardNewsDetailProps) {
                     className={`w-16 h-16 rounded-lg overflow-hidden border-2 transition-colors flex-shrink-0 ${
                       idx === currentPage
                         ? "border-slate-900"
-                        : "border-slate-200 hover:border-slate-400"
+                        : "border-slate-200 hover:border-slate-400 dark:border-slate-700"
                     }`}
                   >
                     <img
@@ -98,10 +98,10 @@ export function CardNewsDetail({ card, onBack }: CardNewsDetailProps) {
             </div>
           )}
 
-          <div className="p-6 border-t border-slate-200">
-            <h1 className="mb-4 text-slate-900">{card.title}</h1>
+          <div className="p-6 border-t border-slate-200 dark:border-slate-700">
+            <h1 className="mb-4 text-slate-900 dark:text-slate-100">{card.title}</h1>
 
-            <div className="flex flex-wrap gap-4 text-sm text-slate-600">
+            <div className="flex flex-wrap gap-4 text-sm text-slate-600 dark:text-slate-300">
               <div className="flex items-center gap-2">
                 <Calendar className="w-4 h-4" />
                 <span>{card.date}</span>
@@ -123,13 +123,13 @@ export function CardNewsDetail({ card, onBack }: CardNewsDetailProps) {
         </div>
 
         {card.pdfUrl && (
-          <div className="mt-8 bg-white rounded-lg shadow-sm overflow-hidden">
-            <div className="p-4 bg-slate-100 border-b border-slate-200">
-              <h3 className="text-slate-900 flex items-center gap-2">
+          <div className="mt-8 bg-white rounded-lg shadow-sm overflow-hidden dark:bg-slate-800">
+            <div className="p-4 bg-slate-100 border-b border-slate-200 dark:bg-slate-700 dark:border-slate-700">
+              <h3 className="text-slate-900 flex items-center gap-2 dark:text-slate-100">
                 <FileText className="w-5 h-5" />
                 Detailed Report
               </h3>
-              <p className="text-sm text-slate-600 mt-1">
+              <p className="text-sm text-slate-600 mt-1 dark:text-slate-300">
                 {card.pdfName || 'Full report in PDF format'}
               </p>
             </div>

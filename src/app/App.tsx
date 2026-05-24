@@ -11,7 +11,8 @@ import { CardNewsDetail } from "./components/CardNewsDetail";
 import { TodayCardNews } from "./components/TodayCardNews";
 import { Reports } from "./components/Reports";
 import { ReportDetail } from "./components/ReportDetail";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
+import { useNavigate, useLocation } from "react-router";
 
 // Sample initial articles
 const initialArticles = [
@@ -283,19 +284,74 @@ const initialArticles = [
 ];
 
 export default function App() {
-  const [selectedCategory, setSelectedCategory] =
-    useState("");
-  const [selectedArticle, setSelectedArticle] =
-    useState<any>(null);
-  const [selectedCard, setSelectedCard] = useState<any>(null);
-  const [selectedReport, setSelectedReport] = useState<any>(null);
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const [isAdmin, setIsAdmin] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [showCardNews, setShowCardNews] = useState(false);
   const [loading, setLoading] = useState(true);
   const [articles, setArticles] = useState<any[]>([]);
   const [cardNews, setCardNews] = useState<any[]>([]);
   const [reports, setReports] = useState<any[]>([]);
+
+  // ---- URL ⇄ view mapping --------------------------------------
+  // The URL is the single source of truth for which section + detail is shown.
+  const COLUMN_SLUGS: Record<string, string> = { politics: "Politics", stocks: "Stocks", economics: "Economics" };
+  const REPORT_SLUGS: Record<string, string> = { "company-analysis": "Company Analysis", "general-report": "General Report" };
+  const slug = (s: string) => (s || "").toLowerCase().replace(/\s+/g, "-");
+
+  const { selectedCategory, showCardNews, cardId, articleId, reportId } = useMemo(() => {
+    const segs = location.pathname.toLowerCase().replace(/\/+$/, "").split("/").filter(Boolean);
+    const base = {
+      selectedCategory: "",
+      showCardNews: false,
+      cardId: null as number | null,
+      articleId: null as number | null,
+      reportId: null as number | null,
+    };
+    if (segs.length === 0) return base;
+    if (segs[0] === "cardnews") {
+      return { ...base, selectedCategory: "Card News", showCardNews: true, cardId: segs[1] ? Number(segs[1]) : null };
+    }
+    if (segs[0] === "columns") {
+      return { ...base, selectedCategory: COLUMN_SLUGS[segs[1]] ?? "Politics", articleId: segs[2] ? Number(segs[2]) : null };
+    }
+    if (segs[0] === "reports") {
+      return { ...base, selectedCategory: segs[1] ? (REPORT_SLUGS[segs[1]] ?? "Reports") : "Reports", reportId: segs[2] ? Number(segs[2]) : null };
+    }
+    return base;
+  }, [location.pathname]);
+
+  // Detail items are resolved from the loaded data by id (deep-link friendly).
+  const selectedCard = useMemo(
+    () => (cardId != null ? cardNews.find((c) => c.id === cardId) ?? null : null),
+    [cardId, cardNews],
+  );
+  const selectedArticle = useMemo(
+    () => (articleId != null ? articles.find((a) => a.id === articleId) ?? null : null),
+    [articleId, articles],
+  );
+  const selectedReport = useMemo(
+    () => (reportId != null ? reports.find((r) => r.id === reportId) ?? null : null),
+    [reportId, reports],
+  );
+
+  const CATEGORY_TO_PATH: Record<string, string> = {
+    "All": "/",
+    "": "/",
+    "Card News": "/cardnews",
+    "Politics": "/columns/politics",
+    "Stocks": "/columns/stocks",
+    "Economics": "/columns/economics",
+    "Reports": "/reports",
+    "Company Analysis": "/reports/company-analysis",
+    "General Report": "/reports/general-report",
+  };
+
+  // Navigate to a section by category name.
+  const goCategory = (category: string) => {
+    navigate(CATEGORY_TO_PATH[category] ?? "/");
+  };
 
   // Fetch data from API on mount
   useEffect(() => {
@@ -443,17 +499,13 @@ export default function App() {
 
   const handleCardClick = (card: any) => {
     const newViews = (card.views || 0) + 1;
-    const updatedCards = cardNews.map(c => c.id === card.id ? { ...c, views: newViews } : c);
-    setCardNews(updatedCards);
-    setSelectedCard(updatedCards.find(c => c.id === card.id));
+    setCardNews(prev => prev.map(c => c.id === card.id ? { ...c, views: newViews } : c));
     fetch('/api/cardnews', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: card.id, views: newViews }) }).catch(console.error);
+    navigate(`/cardnews/${card.id}`);
   };
 
   const handleCardNewsClick = () => {
-    setShowCardNews(true);
-    setSelectedCategory("Card News");
-    setSelectedArticle(null);
-    setSelectedCard(null);
+    navigate("/cardnews");
   };
 
   const handleArticleClick = (article: any) => {
@@ -467,17 +519,17 @@ export default function App() {
       return;
     }
 
-    // For regular articles, increment view count and show detail
+    // For regular articles, increment view count and navigate to its detail URL
     setArticles(prev => prev.map(a => a.id === article.id ? { ...a, views: newViews } : a));
-    setSelectedArticle({ ...article, views: newViews });
     fetch('/api/articles', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: article.id, views: newViews }) }).catch(console.error);
+    navigate(`/columns/${slug(article.category)}/${article.id}`);
   };
 
   const handleReportClick = (report: any) => {
     const newViews = (report.views || 0) + 1;
     setReports(prev => prev.map(r => r.id === report.id ? { ...r, views: newViews } : r));
-    setSelectedReport({ ...report, views: newViews });
     fetch('/api/reports', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: report.id, views: newViews }) }).catch(console.error);
+    navigate(`/reports/${slug(report.category)}/${report.id}`);
   };
 
   const handleAdminClick = () => {
@@ -491,7 +543,7 @@ export default function App() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-slate-600">Loading...</div>
+        <div className="text-slate-600 dark:text-slate-300">Loading...</div>
       </div>
     );
   }
@@ -530,17 +582,13 @@ export default function App() {
       <>
         <Navigation
           selectedCategory={selectedCategory}
-          onCategoryChange={(category) => {
-            setSelectedCategory(category);
-            setSelectedCard(null);
-            setShowCardNews(false);
-          }}
+          onCategoryChange={goCategory}
           onCardNewsClick={handleCardNewsClick}
           onAdminClick={handleAdminClick}
         />
         <CardNewsDetail
           card={selectedCard}
-          onBack={() => setSelectedCard(null)}
+          onBack={() => navigate("/cardnews")}
         />
       </>
     );
@@ -552,17 +600,13 @@ export default function App() {
       <>
         <Navigation
           selectedCategory={selectedCategory}
-          onCategoryChange={(category) => {
-            setSelectedCategory(category);
-            setSelectedArticle(null);
-            setShowCardNews(false);
-          }}
+          onCategoryChange={goCategory}
           onCardNewsClick={handleCardNewsClick}
           onAdminClick={handleAdminClick}
         />
         <ArticleDetail
           article={selectedArticle}
-          onBack={() => setSelectedArticle(null)}
+          onBack={() => navigate(`/columns/${slug(selectedArticle.category)}`)}
         />
       </>
     );
@@ -574,17 +618,13 @@ export default function App() {
       <>
         <Navigation
           selectedCategory={selectedCategory}
-          onCategoryChange={(category) => {
-            setSelectedCategory(category);
-            setSelectedReport(null);
-            setShowCardNews(false);
-          }}
+          onCategoryChange={goCategory}
           onCardNewsClick={handleCardNewsClick}
           onAdminClick={handleAdminClick}
         />
         <ReportDetail
           report={selectedReport}
-          onBack={() => setSelectedReport(null)}
+          onBack={() => navigate(`/reports/${slug(selectedReport.category)}`)}
         />
       </>
     );
@@ -593,21 +633,18 @@ export default function App() {
   // Card News Grid View
   if (showCardNews) {
     return (
-      <div className="min-h-screen bg-slate-50">
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
         <Navigation
           selectedCategory={selectedCategory}
-          onCategoryChange={(category) => {
-            setSelectedCategory(category);
-            setShowCardNews(false);
-          }}
+          onCategoryChange={goCategory}
           onCardNewsClick={handleCardNewsClick}
           onAdminClick={handleAdminClick}
         />
 
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="mb-8">
-            <h1 className="mb-2 text-slate-900">Daily Card News</h1>
-            <p className="text-slate-600">Daily visual insights on politics, stocks, and economics</p>
+            <h1 className="mb-2 text-slate-900 dark:text-slate-100">Daily Card News</h1>
+            <p className="text-slate-600 dark:text-slate-300">Daily visual insights on politics, stocks, and economics</p>
           </div>
 
           <CardNewsGrid
@@ -616,18 +653,18 @@ export default function App() {
           />
         </main>
 
-        <footer className="bg-slate-900 text-white mt-20">
+        <footer className="bg-slate-900 text-white mt-20 dark:bg-slate-950">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div>
                 <h3 className="mb-4">About</h3>
-                <p className="text-slate-400">
+                <p className="text-slate-400 dark:text-slate-500">
                   In-depth analysis on politics, economics, and financial markets.
                 </p>
               </div>
               <div>
                 <h3 className="mb-4">Categories</h3>
-                <ul className="space-y-2 text-slate-400">
+                <ul className="space-y-2 text-slate-400 dark:text-slate-500">
                   <li>Daily Card News</li>
                   <li>Columns — Politics / Stocks / Economics</li>
                   <li>Reports — Company Analysis / General Report</li>
@@ -635,18 +672,18 @@ export default function App() {
               </div>
               <div>
                 <h3 className="mb-4">Connect</h3>
-                <p className="text-slate-400 mb-3">
+                <p className="text-slate-400 mb-3 dark:text-slate-500">
                   Stay updated with the latest columns and analysis.
                 </p>
-                <p className="text-slate-400">
+                <p className="text-slate-400 dark:text-slate-500">
                   Email Address:{" "}
-                  <a href="mailto:itsautumn@snu.ac.kr" className="text-slate-200 hover:text-white transition-colors underline underline-offset-2">
+                  <a href="mailto:itsautumn@snu.ac.kr" className="text-slate-200 hover:text-white transition-colors underline underline-offset-2 dark:text-slate-200 dark:hover:text-white">
                     itsautumn@snu.ac.kr
                   </a>
                 </p>
               </div>
             </div>
-            <div className="border-t border-slate-800 mt-8 pt-8 text-center text-slate-400">
+            <div className="border-t border-slate-800 mt-8 pt-8 text-center text-slate-400 dark:border-slate-700 dark:text-slate-500">
               <p>&copy; 2026 APERI. All rights reserved.</p>
             </div>
           </div>
@@ -659,18 +696,18 @@ export default function App() {
   if (["Politics", "Stocks", "Economics"].includes(selectedCategory)) {
     const filteredArticles = articles.filter(a => a.category === selectedCategory);
     return (
-      <div className="min-h-screen bg-slate-50">
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
         <Navigation
           selectedCategory={selectedCategory}
-          onCategoryChange={(category) => { setSelectedCategory(category); setShowCardNews(false); }}
+          onCategoryChange={goCategory}
           onCardNewsClick={handleCardNewsClick}
           onAdminClick={handleAdminClick}
         />
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <h1 className="mb-2 text-slate-900">{selectedCategory} Columns</h1>
-          <p className="text-slate-500 mb-8">{filteredArticles.length} article{filteredArticles.length !== 1 ? "s" : ""}</p>
+          <h1 className="mb-2 text-slate-900 dark:text-slate-100">{selectedCategory} Columns</h1>
+          <p className="text-slate-500 mb-8 dark:text-slate-400">{filteredArticles.length} article{filteredArticles.length !== 1 ? "s" : ""}</p>
           {filteredArticles.length === 0 ? (
-            <p className="text-slate-500">No articles in this category yet.</p>
+            <p className="text-slate-500 dark:text-slate-400">No articles in this category yet.</p>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredArticles.map(article => (
@@ -679,14 +716,14 @@ export default function App() {
             </div>
           )}
         </main>
-        <footer className="bg-slate-900 text-white mt-20">
+        <footer className="bg-slate-900 text-white mt-20 dark:bg-slate-950">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div><h3 className="mb-4">About</h3><p className="text-slate-400">In-depth analysis on politics, economics, and financial markets.</p></div>
-              <div><h3 className="mb-4">Categories</h3><ul className="space-y-2 text-slate-400"><li>Daily Card News</li><li>Columns — Politics / Stocks / Economics</li><li>Reports — Company Analysis / General Report</li></ul></div>
-              <div><h3 className="mb-4">Connect</h3><p className="text-slate-400">Email Address:{" "}<a href="mailto:itsautumn@snu.ac.kr" className="text-slate-200 hover:text-white transition-colors underline underline-offset-2">itsautumn@snu.ac.kr</a></p></div>
+              <div><h3 className="mb-4">About</h3><p className="text-slate-400 dark:text-slate-500">In-depth analysis on politics, economics, and financial markets.</p></div>
+              <div><h3 className="mb-4">Categories</h3><ul className="space-y-2 text-slate-400 dark:text-slate-500"><li>Daily Card News</li><li>Columns — Politics / Stocks / Economics</li><li>Reports — Company Analysis / General Report</li></ul></div>
+              <div><h3 className="mb-4">Connect</h3><p className="text-slate-400 dark:text-slate-500">Email Address:{" "}<a href="mailto:itsautumn@snu.ac.kr" className="text-slate-200 hover:text-white transition-colors underline underline-offset-2 dark:text-slate-200 dark:hover:text-white">itsautumn@snu.ac.kr</a></p></div>
             </div>
-            <div className="border-t border-slate-800 mt-8 pt-8 text-center text-slate-400"><p>&copy; 2026 APERI. All rights reserved.</p></div>
+            <div className="border-t border-slate-800 mt-8 pt-8 text-center text-slate-400 dark:border-slate-700 dark:text-slate-500"><p>&copy; 2026 APERI. All rights reserved.</p></div>
           </div>
         </footer>
       </div>
@@ -696,13 +733,10 @@ export default function App() {
   // Reports View
   if (["Reports", "Company Analysis", "General Report"].includes(selectedCategory)) {
     return (
-      <div className="min-h-screen bg-slate-50">
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
         <Navigation
           selectedCategory={selectedCategory}
-          onCategoryChange={(category) => {
-            setSelectedCategory(category);
-            setShowCardNews(false);
-          }}
+          onCategoryChange={goCategory}
           onCardNewsClick={handleCardNewsClick}
           onAdminClick={handleAdminClick}
         />
@@ -711,21 +745,21 @@ export default function App() {
           reports={reports}
           onReportClick={handleReportClick}
           selectedCategory={selectedCategory === "Reports" ? "Company Analysis" : selectedCategory}
-          onCategoryChange={setSelectedCategory}
+          onCategoryChange={goCategory}
         />
 
-        <footer className="bg-slate-900 text-white mt-20">
+        <footer className="bg-slate-900 text-white mt-20 dark:bg-slate-950">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div>
                 <h3 className="mb-4">About</h3>
-                <p className="text-slate-400">
+                <p className="text-slate-400 dark:text-slate-500">
                   In-depth analysis on politics, economics, and financial markets.
                 </p>
               </div>
               <div>
                 <h3 className="mb-4">Categories</h3>
-                <ul className="space-y-2 text-slate-400">
+                <ul className="space-y-2 text-slate-400 dark:text-slate-500">
                   <li>Daily Card News</li>
                   <li>Columns — Politics / Stocks / Economics</li>
                   <li>Reports — Company Analysis / General Report</li>
@@ -733,18 +767,18 @@ export default function App() {
               </div>
               <div>
                 <h3 className="mb-4">Connect</h3>
-                <p className="text-slate-400 mb-3">
+                <p className="text-slate-400 mb-3 dark:text-slate-500">
                   Stay updated with the latest columns and analysis.
                 </p>
-                <p className="text-slate-400">
+                <p className="text-slate-400 dark:text-slate-500">
                   Email Address:{" "}
-                  <a href="mailto:itsautumn@snu.ac.kr" className="text-slate-200 hover:text-white transition-colors underline underline-offset-2">
+                  <a href="mailto:itsautumn@snu.ac.kr" className="text-slate-200 hover:text-white transition-colors underline underline-offset-2 dark:text-slate-200 dark:hover:text-white">
                     itsautumn@snu.ac.kr
                   </a>
                 </p>
               </div>
             </div>
-            <div className="border-t border-slate-800 mt-8 pt-8 text-center text-slate-400">
+            <div className="border-t border-slate-800 mt-8 pt-8 text-center text-slate-400 dark:border-slate-700 dark:text-slate-500">
               <p>&copy; 2026 APERI. All rights reserved.</p>
             </div>
           </div>
@@ -754,13 +788,10 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
       <Navigation
         selectedCategory={selectedCategory}
-        onCategoryChange={(category) => {
-          setSelectedCategory(category);
-          setShowCardNews(false);
-        }}
+        onCategoryChange={goCategory}
         onCardNewsClick={handleCardNewsClick}
         onAdminClick={handleAdminClick}
       />
@@ -786,15 +817,15 @@ export default function App() {
               ].sort((a, b) => b.id - a.id);
               const post = combined[0];
               if (!post) return (
-                <div className="bg-white rounded-lg shadow-sm p-6 h-full flex items-center justify-center">
-                  <p className="text-slate-400 text-sm">No posts yet</p>
+                <div className="bg-white rounded-lg shadow-sm p-6 h-full flex items-center justify-center dark:bg-slate-800">
+                  <p className="text-slate-400 text-sm dark:text-slate-500">No posts yet</p>
                 </div>
               );
               const COLORS = ["#93C5FD","#86EFAC","#C4B5FD","#FDE68A","#FCA5A5","#7DD3FC","#BBF7D0","#FED7AA","#FBCFE8","#A5B4FC"];
               const fallback = COLORS[post.id % COLORS.length];
               return (
                 <div
-                  className="bg-white rounded-lg shadow-sm overflow-hidden cursor-pointer hover:shadow-lg transition-all h-full flex flex-col"
+                  className="bg-white rounded-lg shadow-sm overflow-hidden cursor-pointer hover:shadow-lg transition-all h-full flex flex-col dark:bg-slate-800"
                   onClick={() => post.type === "article" ? handleArticleClick(post) : handleReportClick(post)}
                 >
                   <div className="h-48 overflow-hidden relative" style={{ background: fallback }}>
@@ -803,16 +834,16 @@ export default function App() {
                         onError={e => { e.currentTarget.style.display="none"; }} />
                     )}
                     <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/50 to-transparent p-3">
-                      <span className={`text-xs font-medium px-2 py-1 rounded-full ${post.type === "report" ? "bg-blue-500 text-white" : "bg-white/90 text-slate-800"}`}>
+                      <span className={`text-xs font-medium px-2 py-1 rounded-full ${post.type === "report" ? "bg-blue-500 text-white" : "bg-white/90 text-slate-800 dark:text-slate-100"}`}>
                         {post.type === "report" ? "📊 " : "✍️ "}{post.category}
                       </span>
                     </div>
                   </div>
                   <div className="p-4 flex flex-col flex-1">
-                    <p className="text-xs text-slate-400 mb-1">Most Recent Post</p>
-                    <h3 className="text-slate-900 font-semibold line-clamp-2 mb-2">{post.title}</h3>
-                    {post.excerpt && <p className="text-slate-600 text-sm line-clamp-3 mb-3">{post.excerpt}</p>}
-                    <p className="text-slate-400 text-xs mt-auto">{post.date}</p>
+                    <p className="text-xs text-slate-400 mb-1 dark:text-slate-500">Most Recent Post</p>
+                    <h3 className="text-slate-900 font-semibold line-clamp-2 mb-2 dark:text-slate-100">{post.title}</h3>
+                    {post.excerpt && <p className="text-slate-600 text-sm line-clamp-3 mb-3 dark:text-slate-300">{post.excerpt}</p>}
+                    <p className="text-slate-400 text-xs mt-auto dark:text-slate-500">{post.date}</p>
                   </div>
                 </div>
               );
@@ -821,8 +852,8 @@ export default function App() {
 
           {/* Right 1/3: Recent Posts list */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow-sm p-6 h-full">
-              <h2 className="text-slate-900 mb-4" style={{fontSize: "1.1rem"}}>Recent Posts</h2>
+            <div className="bg-white rounded-lg shadow-sm p-6 h-full dark:bg-slate-800">
+              <h2 className="text-slate-900 mb-4 dark:text-slate-100" style={{fontSize: "1.1rem"}}>Recent Posts</h2>
               <div className="space-y-4">
                 {[
                   ...articles.filter(a => !a.isExternal).map(a => ({ ...a, type: "article" as const })),
@@ -833,18 +864,18 @@ export default function App() {
                   .map((item) => (
                     <div
                       key={`${item.type}-${item.id}`}
-                      className="pb-4 border-b border-slate-100 last:border-0 last:pb-0 cursor-pointer hover:text-slate-600 transition-colors"
+                      className="pb-4 border-b border-slate-100 last:border-0 last:pb-0 cursor-pointer hover:text-slate-600 transition-colors dark:border-slate-700 dark:hover:text-slate-300"
                       onClick={() => item.type === "article" ? handleArticleClick(item) : handleReportClick(item)}
                     >
-                      <span className={`text-xs font-medium px-2 py-0.5 rounded-full mb-1.5 inline-block ${item.type === "report" ? "bg-blue-100 text-blue-700" : "bg-slate-100 text-slate-600"}`}>
+                      <span className={`text-xs font-medium px-2 py-0.5 rounded-full mb-1.5 inline-block ${item.type === "report" ? "bg-blue-100 text-blue-700" : "bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300"}`}>
                         {item.category}
                       </span>
-                      <p className="text-slate-900 text-sm line-clamp-2">{item.title}</p>
-                      <p className="text-slate-400 text-xs mt-1">{item.date}</p>
+                      <p className="text-slate-900 text-sm line-clamp-2 dark:text-slate-100">{item.title}</p>
+                      <p className="text-slate-400 text-xs mt-1 dark:text-slate-500">{item.date}</p>
                     </div>
                   ))}
                 {articles.length === 0 && reports.length === 0 && (
-                  <p className="text-slate-500 text-sm">No posts yet</p>
+                  <p className="text-slate-500 text-sm dark:text-slate-400">No posts yet</p>
                 )}
               </div>
             </div>
@@ -869,24 +900,24 @@ export default function App() {
             <Sidebar
               articles={articles}
               reports={reports}
-              onCategoryChange={setSelectedCategory}
+              onCategoryChange={goCategory}
             />
           </aside>
         </div>
       </main>
 
-      <footer className="bg-slate-900 text-white mt-20">
+      <footer className="bg-slate-900 text-white mt-20 dark:bg-slate-950">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div>
                 <h3 className="mb-4">About</h3>
-                <p className="text-slate-400">
+                <p className="text-slate-400 dark:text-slate-500">
                   In-depth analysis on politics, economics, and financial markets.
                 </p>
               </div>
               <div>
                 <h3 className="mb-4">Categories</h3>
-                <ul className="space-y-2 text-slate-400">
+                <ul className="space-y-2 text-slate-400 dark:text-slate-500">
                   <li>Daily Card News</li>
                   <li>Columns — Politics / Stocks / Economics</li>
                   <li>Reports — Company Analysis / General Report</li>
@@ -894,18 +925,18 @@ export default function App() {
               </div>
               <div>
                 <h3 className="mb-4">Connect</h3>
-                <p className="text-slate-400 mb-3">
+                <p className="text-slate-400 mb-3 dark:text-slate-500">
                   Stay updated with the latest columns and analysis.
                 </p>
-                <p className="text-slate-400">
+                <p className="text-slate-400 dark:text-slate-500">
                   Email Address:{" "}
-                  <a href="mailto:itsautumn@snu.ac.kr" className="text-slate-200 hover:text-white transition-colors underline underline-offset-2">
+                  <a href="mailto:itsautumn@snu.ac.kr" className="text-slate-200 hover:text-white transition-colors underline underline-offset-2 dark:text-slate-200 dark:hover:text-white">
                     itsautumn@snu.ac.kr
                   </a>
                 </p>
               </div>
             </div>
-            <div className="border-t border-slate-800 mt-8 pt-8 text-center text-slate-400">
+            <div className="border-t border-slate-800 mt-8 pt-8 text-center text-slate-400 dark:border-slate-700 dark:text-slate-500">
               <p>&copy; 2026 APERI. All rights reserved.</p>
             </div>
           </div>

@@ -162,13 +162,13 @@ export function AdminPanel({ articles, cardNews, reports, onAddArticle, onEditAr
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <div className="bg-white border-b border-slate-200">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
+      <div className="bg-white border-b border-slate-200 dark:bg-slate-800 dark:border-slate-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex justify-between items-center mb-6">
             <div>
-              <h1 className="mb-2 text-slate-900">Admin Panel</h1>
-              <p className="text-slate-600">Manage your columns, card news, and reports</p>
+              <h1 className="mb-2 text-slate-900 dark:text-slate-100">Admin Panel</h1>
+              <p className="text-slate-600 dark:text-slate-300">Manage your columns, card news, and reports</p>
             </div>
             <div className="flex gap-3">
               <Button variant="outline" onClick={onLogout}>
@@ -193,13 +193,13 @@ export function AdminPanel({ articles, cardNews, reports, onAddArticle, onEditAr
             </div>
           </div>
 
-          <div className="flex gap-2 border-b border-slate-200">
+          <div className="flex gap-2 border-b border-slate-200 dark:border-slate-700">
             <button
               onClick={() => setActiveTab("articles")}
               className={`px-4 py-2 -mb-px border-b-2 transition-colors ${
                 activeTab === "articles"
-                  ? "border-slate-900 text-slate-900"
-                  : "border-transparent text-slate-600 hover:text-slate-900"
+                  ? "border-slate-900 text-slate-900 dark:text-slate-100"
+                  : "border-transparent text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-slate-100"
               }`}
             >
               <div className="flex items-center gap-2">
@@ -211,8 +211,8 @@ export function AdminPanel({ articles, cardNews, reports, onAddArticle, onEditAr
               onClick={() => setActiveTab("cardnews")}
               className={`px-4 py-2 -mb-px border-b-2 transition-colors ${
                 activeTab === "cardnews"
-                  ? "border-slate-900 text-slate-900"
-                  : "border-transparent text-slate-600 hover:text-slate-900"
+                  ? "border-slate-900 text-slate-900 dark:text-slate-100"
+                  : "border-transparent text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-slate-100"
               }`}
             >
               <div className="flex items-center gap-2">
@@ -224,8 +224,8 @@ export function AdminPanel({ articles, cardNews, reports, onAddArticle, onEditAr
               onClick={() => setActiveTab("reports")}
               className={`px-4 py-2 -mb-px border-b-2 transition-colors ${
                 activeTab === "reports"
-                  ? "border-slate-900 text-slate-900"
-                  : "border-transparent text-slate-600 hover:text-slate-900"
+                  ? "border-slate-900 text-slate-900 dark:text-slate-100"
+                  : "border-transparent text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-slate-100"
               }`}
             >
               <div className="flex items-center gap-2">
@@ -251,8 +251,8 @@ export function AdminPanel({ articles, cardNews, reports, onAddArticle, onEditAr
             <div className="grid grid-cols-1 gap-4">
               {articles.length === 0 ? (
                 <Card className="p-12 text-center">
-                  <h3 className="mb-2 text-slate-900">No articles yet</h3>
-                  <p className="text-slate-600 mb-6">Start by creating your first column</p>
+                  <h3 className="mb-2 text-slate-900 dark:text-slate-100">No articles yet</h3>
+                  <p className="text-slate-600 mb-6 dark:text-slate-300">Start by creating your first column</p>
                   <Button onClick={handleNewArticle}>
                     <Plus className="w-4 h-4 mr-2" />
                     Create First Article
@@ -268,7 +268,7 @@ export function AdminPanel({ articles, cardNews, reports, onAddArticle, onEditAr
                       onChange={() => toggleArticleSelection(article.id)}
                       className="w-5 h-5 mt-1"
                     />
-                    <div className="w-48 h-32 bg-slate-200 rounded-lg overflow-hidden flex-shrink-0">
+                    <div className="w-48 h-32 bg-slate-200 rounded-lg overflow-hidden flex-shrink-0 dark:bg-slate-700">
                       <img
                         src={article.image}
                         alt={article.title}
@@ -278,10 +278,10 @@ export function AdminPanel({ articles, cardNews, reports, onAddArticle, onEditAr
                     <div className="flex-1">
                     <div className="flex justify-between items-start mb-2">
                       <div>
-                        <span className="inline-block px-2 py-1 rounded text-slate-700 bg-slate-100 mb-2">
+                        <span className="inline-block px-2 py-1 rounded text-slate-700 bg-slate-100 mb-2 dark:text-slate-200 dark:bg-slate-700">
                           {article.category}
                         </span>
-                        <h3 className="text-slate-900">{article.title}</h3>
+                        <h3 className="text-slate-900 dark:text-slate-100">{article.title}</h3>
                       </div>
                       <div className="flex gap-2">
                         <Button
@@ -305,14 +305,14 @@ export function AdminPanel({ articles, cardNews, reports, onAddArticle, onEditAr
                         </Button>
                       </div>
                     </div>
-                    <p className="text-slate-600 mb-4 line-clamp-2">{article.excerpt}</p>
-                    <div className="flex flex-wrap gap-3 text-sm text-slate-500">
+                    <p className="text-slate-600 mb-4 line-clamp-2 dark:text-slate-300">{article.excerpt}</p>
+                    <div className="flex flex-wrap gap-3 text-sm text-slate-500 dark:text-slate-400">
                       <span className="whitespace-nowrap">{article.date}</span>
-                      <span className="text-slate-300">•</span>
+                      <span className="text-slate-300 dark:text-slate-600">•</span>
                       <span className="whitespace-nowrap">{article.readTime}</span>
                       {article.views !== undefined && (
                         <>
-                          <span className="text-slate-300">•</span>
+                          <span className="text-slate-300 dark:text-slate-600">•</span>
                           <div className="flex items-center gap-1.5 whitespace-nowrap">
                             <Eye className="w-4 h-4 flex-shrink-0" />
                             <span>{article.views.toLocaleString()} views</span>
@@ -347,8 +347,8 @@ export function AdminPanel({ articles, cardNews, reports, onAddArticle, onEditAr
             <div className="grid grid-cols-1 gap-4">
               {reports.length === 0 ? (
                 <Card className="p-12 text-center">
-                  <h3 className="mb-2 text-slate-900">No reports yet</h3>
-                  <p className="text-slate-600 mb-6">Start by creating your first report</p>
+                  <h3 className="mb-2 text-slate-900 dark:text-slate-100">No reports yet</h3>
+                  <p className="text-slate-600 mb-6 dark:text-slate-300">Start by creating your first report</p>
                   <Button onClick={handleNewReport}>
                     <Plus className="w-4 h-4 mr-2" />
                     Create First Report
@@ -364,7 +364,7 @@ export function AdminPanel({ articles, cardNews, reports, onAddArticle, onEditAr
                         onChange={() => toggleReportSelection(report.id)}
                         className="w-5 h-5 mt-1"
                       />
-                      <div className="w-48 h-32 bg-slate-200 rounded-lg overflow-hidden flex-shrink-0">
+                      <div className="w-48 h-32 bg-slate-200 rounded-lg overflow-hidden flex-shrink-0 dark:bg-slate-700">
                         <img
                           src={report.image}
                           alt={report.title}
@@ -374,10 +374,10 @@ export function AdminPanel({ articles, cardNews, reports, onAddArticle, onEditAr
                       <div className="flex-1">
                         <div className="flex justify-between items-start mb-2">
                           <div>
-                            <span className="inline-block px-2 py-1 rounded text-slate-700 bg-slate-100 mb-2">
+                            <span className="inline-block px-2 py-1 rounded text-slate-700 bg-slate-100 mb-2 dark:text-slate-200 dark:bg-slate-700">
                               {report.category}
                             </span>
-                            <h3 className="text-slate-900">{report.title}</h3>
+                            <h3 className="text-slate-900 dark:text-slate-100">{report.title}</h3>
                           </div>
                           <div className="flex gap-2">
                             <Button
@@ -401,14 +401,14 @@ export function AdminPanel({ articles, cardNews, reports, onAddArticle, onEditAr
                             </Button>
                           </div>
                         </div>
-                        <p className="text-slate-600 mb-4 line-clamp-2">{report.excerpt}</p>
-                        <div className="flex flex-wrap gap-3 text-sm text-slate-500">
+                        <p className="text-slate-600 mb-4 line-clamp-2 dark:text-slate-300">{report.excerpt}</p>
+                        <div className="flex flex-wrap gap-3 text-sm text-slate-500 dark:text-slate-400">
                           <span className="whitespace-nowrap">{report.date}</span>
-                          <span className="text-slate-300">•</span>
+                          <span className="text-slate-300 dark:text-slate-600">•</span>
                           <span className="whitespace-nowrap">{report.readTime}</span>
                           {report.views !== undefined && (
                             <>
-                              <span className="text-slate-300">•</span>
+                              <span className="text-slate-300 dark:text-slate-600">•</span>
                               <div className="flex items-center gap-1.5 whitespace-nowrap">
                                 <Eye className="w-4 h-4 flex-shrink-0" />
                                 <span>{report.views.toLocaleString()} views</span>

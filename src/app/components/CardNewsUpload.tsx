@@ -198,7 +198,7 @@ export function CardNewsUpload({ cardNews, onAddCard, onDeleteCard, onBulkDelete
           <Card className="p-6">
             <form onSubmit={handleSubmit}>
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-slate-900">
+                <h3 className="text-slate-900 dark:text-slate-100">
                   {editingCard ? 'Edit Card News' : 'Upload Card News'}
                 </h3>
                 <Button
@@ -213,26 +213,26 @@ export function CardNewsUpload({ cardNews, onAddCard, onDeleteCard, onBulkDelete
 
               <div className="space-y-4">
                 <div>
-                  <label htmlFor="cardDate" className="block mb-2 text-slate-700">
-                    Date <span className="text-slate-400 text-sm">(becomes the title)</span>
+                  <label htmlFor="cardDate" className="block mb-2 text-slate-700 dark:text-slate-200">
+                    Date <span className="text-slate-400 text-sm dark:text-slate-500">(becomes the title)</span>
                   </label>
                   <input
                     id="cardDate"
                     type="date"
                     value={selectedDate}
                     onChange={(e) => setSelectedDate(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-slate-900"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-slate-900 dark:border-slate-600"
                     required
                   />
                   {selectedDate && (
-                    <p className="text-sm text-slate-500 mt-1">
-                      Title: <span className="font-medium text-slate-700">{formatDateTitle(selectedDate)}</span>
+                    <p className="text-sm text-slate-500 mt-1 dark:text-slate-400">
+                      Title: <span className="font-medium text-slate-700 dark:text-slate-200">{formatDateTitle(selectedDate)}</span>
                     </p>
                   )}
                 </div>
 
                 <div>
-                  <label className="block mb-2 text-slate-700">
+                  <label className="block mb-2 text-slate-700 dark:text-slate-200">
                     Card News Images (Upload 4-6 images)
                   </label>
                   <input
@@ -240,21 +240,21 @@ export function CardNewsUpload({ cardNews, onAddCard, onDeleteCard, onBulkDelete
                     accept="image/*"
                     multiple
                     onChange={handleFileChange}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-slate-900"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-slate-900 dark:border-slate-600"
                   />
-                  <p className="text-sm text-slate-500 mt-1">
+                  <p className="text-sm text-slate-500 mt-1 dark:text-slate-400">
                     Select 4-6 images to create a card news carousel
                   </p>
                   {images.length > 0 && (
                     <div className="mt-3">
-                      <p className="text-sm text-slate-600 mb-2">
+                      <p className="text-sm text-slate-600 mb-2 dark:text-slate-300">
                         {images.length} image{images.length !== 1 ? 's' : ''} added
                         {images.length < 4 && ' (need at least 4)'}
                         {images.length > 6 && ' (maximum 6 allowed)'}
                       </p>
                       <div className="grid grid-cols-3 gap-2">
                         {images.map((img, index) => (
-                          <div key={index} className="relative aspect-square bg-slate-100 rounded-lg overflow-hidden group">
+                          <div key={index} className="relative aspect-square bg-slate-100 rounded-lg overflow-hidden group dark:bg-slate-700">
                             <img
                               src={img}
                               alt={`Page ${index + 1}`}
@@ -278,26 +278,26 @@ export function CardNewsUpload({ cardNews, onAddCard, onDeleteCard, onBulkDelete
                 </div>
 
                 <div>
-                  <label className="block mb-2 text-slate-700">
+                  <label className="block mb-2 text-slate-700 dark:text-slate-200">
                     PDF Report (Optional)
                   </label>
                   <input
                     type="file"
                     accept=".pdf,application/pdf"
                     onChange={handlePdfFileChange}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-slate-900"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-slate-900 dark:border-slate-600"
                   />
-                  <p className="text-sm text-slate-500 mt-1">
+                  <p className="text-sm text-slate-500 mt-1 dark:text-slate-400">
                     Upload a detailed PDF version (optional)
                   </p>
 
                   {pdfUrl && (
-                    <div className="mt-3 p-4 bg-slate-100 rounded-lg flex items-center justify-between">
+                    <div className="mt-3 p-4 bg-slate-100 rounded-lg flex items-center justify-between dark:bg-slate-700">
                       <div className="flex items-center gap-3">
-                        <FileText className="w-8 h-8 text-slate-600" />
+                        <FileText className="w-8 h-8 text-slate-600 dark:text-slate-300" />
                         <div>
-                          <p className="text-slate-900">{pdfName || 'Report.pdf'}</p>
-                          <p className="text-sm text-slate-500">PDF uploaded</p>
+                          <p className="text-slate-900 dark:text-slate-100">{pdfName || 'Report.pdf'}</p>
+                          <p className="text-sm text-slate-500 dark:text-slate-400">PDF uploaded</p>
                         </div>
                       </div>
                       <button
@@ -336,7 +336,7 @@ export function CardNewsUpload({ cardNews, onAddCard, onDeleteCard, onBulkDelete
       <div className="grid grid-cols-1 gap-4">
         {cardNews.length === 0 ? (
           <Card className="p-8 text-center">
-            <p className="text-slate-600">No card news uploaded yet</p>
+            <p className="text-slate-600 dark:text-slate-300">No card news uploaded yet</p>
           </Card>
         ) : (
           cardNews.map((card) => (
@@ -350,7 +350,7 @@ export function CardNewsUpload({ cardNews, onAddCard, onDeleteCard, onBulkDelete
                 />
                 <div className="flex gap-3 overflow-x-auto flex-shrink-0">
                   {(card.images || []).map((img, idx) => (
-                    <div key={idx} className="w-20 h-20 bg-slate-100 rounded-lg overflow-hidden flex-shrink-0 relative">
+                    <div key={idx} className="w-20 h-20 bg-slate-100 rounded-lg overflow-hidden flex-shrink-0 relative dark:bg-slate-700">
                       <img
                         src={img}
                         alt={`${card.title} - Page ${idx + 1}`}
@@ -365,14 +365,14 @@ export function CardNewsUpload({ cardNews, onAddCard, onDeleteCard, onBulkDelete
                 <div className="flex-1 min-w-0">
                   <div className="flex justify-between items-start">
                     <div className="flex-1 min-w-0">
-                      <h4 className="text-slate-900 mb-1 truncate">{card.title}</h4>
-                      <div className="flex gap-3 text-sm text-slate-500">
+                      <h4 className="text-slate-900 mb-1 truncate dark:text-slate-100">{card.title}</h4>
+                      <div className="flex gap-3 text-sm text-slate-500 dark:text-slate-400">
                         <span>{card.date}</span>
-                        <span className="text-slate-300">•</span>
+                        <span className="text-slate-300 dark:text-slate-600">•</span>
                         <span>{(card.images || []).length} pages</span>
                         {card.views !== undefined && (
                           <>
-                            <span className="text-slate-300">•</span>
+                            <span className="text-slate-300 dark:text-slate-600">•</span>
                             <div className="flex items-center gap-1">
                               <Eye className="w-3 h-3" />
                               <span>{card.views.toLocaleString()}</span>

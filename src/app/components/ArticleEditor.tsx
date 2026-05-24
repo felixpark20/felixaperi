@@ -90,11 +90,11 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <div className="bg-white border-b border-slate-200">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
+      <div className="bg-white border-b border-slate-200 dark:bg-slate-800 dark:border-slate-700">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex justify-between items-center">
-            <h1 className="text-slate-900">
+            <h1 className="text-slate-900 dark:text-slate-100">
               {article ? 'Edit Article' : 'New Article'}
             </h1>
             <Button variant="ghost" onClick={onCancel}>
@@ -189,7 +189,7 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
                     </div>
                   </div>
                   {formData.image && (
-                    <div className="relative w-full h-48 bg-slate-100 rounded-lg overflow-hidden group">
+                    <div className="relative w-full h-48 bg-slate-100 rounded-lg overflow-hidden group dark:bg-slate-700">
                       <img
                         src={formData.image}
                         alt="Preview"
@@ -231,11 +231,11 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
                       type="text"
                       value={formData.externalLink}
                       onChange={(e) => setFormData({ ...formData, externalLink: e.target.value })}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-md"
+                      className="w-full px-3 py-2 border border-slate-300 rounded-md dark:border-slate-600"
                       placeholder="https://www.foxnews.com/article-url"
                       required={formData.isExternal}
                     />
-                    <p className="text-slate-500 mt-1">
+                    <p className="text-slate-500 mt-1 dark:text-slate-400">
                       When clicked, this article will open the external link in a new tab
                     </p>
                   </div>
@@ -255,10 +255,10 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
                   className="mt-2"
                 />
                 <div className="flex justify-between items-center mt-2">
-                  <p className="text-slate-500">
+                  <p className="text-slate-500 dark:text-slate-400">
                     Tip: Separate paragraphs with double line breaks
                   </p>
-                  <p className="text-slate-600">
+                  <p className="text-slate-600 dark:text-slate-300">
                     📖 Reading time: <strong>{formData.readTime}</strong> (auto-calculated)
                   </p>
                 </div>
@@ -266,7 +266,7 @@ export function ArticleEditor({ article, onSave, onCancel }: ArticleEditorProps)
             </div>
 
             {/* Actions */}
-            <div className="flex gap-3 mt-8 pt-6 border-t border-slate-200">
+            <div className="flex gap-3 mt-8 pt-6 border-t border-slate-200 dark:border-slate-700">
               <Button type="submit" className="flex-1">
                 {article ? 'Update Article' : 'Publish Article'}
               </Button>

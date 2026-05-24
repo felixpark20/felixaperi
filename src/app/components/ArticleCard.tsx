@@ -27,7 +27,7 @@ export function ArticleCard({ article, onClick }: ArticleCardProps) {
   const fallbackColor = FALLBACK_COLORS[article.id % FALLBACK_COLORS.length];
 
   return (
-    <article onClick={onClick} className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
+    <article onClick={onClick} className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow cursor-pointer dark:bg-slate-800">
       <div className="h-48 overflow-hidden" style={{ background: article.image ? undefined : fallbackColor }}>
         {article.image ? (
           <img
@@ -46,28 +46,28 @@ export function ArticleCard({ article, onClick }: ArticleCardProps) {
         <div className="flex items-center justify-between mb-2">
           <Badge variant="secondary">{article.category}</Badge>
           {article.isExternal && (
-            <ExternalLink className="w-4 h-4 text-slate-400" />
+            <ExternalLink className="w-4 h-4 text-slate-400 dark:text-slate-500" />
           )}
         </div>
-        <h3 className="mb-2 text-slate-900">
+        <h3 className="mb-2 text-slate-900 dark:text-slate-100">
           {article.title}
         </h3>
-        <p className="text-slate-600 mb-4 line-clamp-2">
+        <p className="text-slate-600 mb-4 line-clamp-2 dark:text-slate-300">
           {article.excerpt}
         </p>
-        <div className="flex flex-wrap items-center gap-3 text-sm text-slate-500">
+        <div className="flex flex-wrap items-center gap-3 text-sm text-slate-500 dark:text-slate-400">
           <div className="flex items-center gap-1.5 whitespace-nowrap">
             <Calendar className="w-4 h-4 flex-shrink-0" />
             <span>{article.date}</span>
           </div>
-          <span className="text-slate-300">•</span>
+          <span className="text-slate-300 dark:text-slate-600">•</span>
           <div className="flex items-center gap-1.5 whitespace-nowrap">
             <Clock className="w-4 h-4 flex-shrink-0" />
             <span>{article.readTime}</span>
           </div>
           {article.views !== undefined && (
             <>
-              <span className="text-slate-300">•</span>
+              <span className="text-slate-300 dark:text-slate-600">•</span>
               <div className="flex items-center gap-1.5 whitespace-nowrap">
                 <Eye className="w-4 h-4 flex-shrink-0" />
                 <span>{article.views.toLocaleString()}</span>

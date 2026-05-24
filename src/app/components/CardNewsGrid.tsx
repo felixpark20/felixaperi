@@ -17,8 +17,8 @@ export function CardNewsGrid({ cardNews, onCardClick }: CardNewsGridProps) {
   if (cardNews.length === 0) {
     return (
       <div className="text-center py-16">
-        <h3 className="mb-2 text-slate-900">No card news yet</h3>
-        <p className="text-slate-600">Card news will appear here once uploaded</p>
+        <h3 className="mb-2 text-slate-900 dark:text-slate-100">No card news yet</h3>
+        <p className="text-slate-600 dark:text-slate-300">Card news will appear here once uploaded</p>
       </div>
     );
   }
@@ -29,9 +29,9 @@ export function CardNewsGrid({ cardNews, onCardClick }: CardNewsGridProps) {
         <div
           key={card.id}
           onClick={() => onCardClick(card)}
-          className="group cursor-pointer bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300"
+          className="group cursor-pointer bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 dark:bg-slate-800"
         >
-          <div className="aspect-square bg-slate-100 overflow-hidden relative">
+          <div className="aspect-square bg-slate-100 overflow-hidden relative dark:bg-slate-700">
             <img
               src={(card.images || [])[0]}
               alt={card.title}
@@ -49,8 +49,8 @@ export function CardNewsGrid({ cardNews, onCardClick }: CardNewsGridProps) {
             )}
           </div>
           <div className="p-4">
-            <h3 className="text-slate-900 mb-2 line-clamp-2">{card.title}</h3>
-            <div className="flex items-center justify-between text-sm text-slate-500">
+            <h3 className="text-slate-900 mb-2 line-clamp-2 dark:text-slate-100">{card.title}</h3>
+            <div className="flex items-center justify-between text-sm text-slate-500 dark:text-slate-400">
               <span>{card.date}</span>
               {card.views !== undefined && (
                 <span>{card.views.toLocaleString()} views</span>

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Menu, X, Settings, ChevronDown } from "lucide-react";
+import { Menu, X, Settings, ChevronDown, Sun, Moon, Monitor, Lock, Check } from "lucide-react";
 import { Button } from "./ui/button";
 
 interface NavigationProps {
@@ -9,12 +9,45 @@ interface NavigationProps {
   onCardNewsClick?: () => void;
 }
 
+type Theme = "light" | "dark" | "system";
+
 export function Navigation({ selectedCategory, onCategoryChange, onAdminClick, onCardNewsClick }: NavigationProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [showColumnsDropdown, setShowColumnsDropdown] = useState(false);
   const [showReportsDropdown, setShowReportsDropdown] = useState(false);
+  const [showSettingsDropdown, setShowSettingsDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const reportsDropdownRef = useRef<HTMLDivElement>(null);
+  const settingsDropdownRef = useRef<HTMLDivElement>(null);
+
+  // Theme state — persisted in localStorage, applied to <html>
+  const [theme, setTheme] = useState<Theme>(() => {
+    if (typeof window === "undefined") return "system";
+    return (localStorage.getItem("theme") as Theme) || "system";
+  });
+
+  useEffect(() => {
+    const root = document.documentElement;
+    const applyTheme = () => {
+      const resolved =
+        theme === "system"
+          ? window.matchMedia("(prefers-color-scheme: dark)").matches
+            ? "dark"
+            : "light"
+          : theme;
+      root.classList.toggle("dark", resolved === "dark");
+    };
+    applyTheme();
+    localStorage.setItem("theme", theme);
+
+    // React to system preference changes while in "system" mode
+    if (theme === "system") {
+      const mq = window.matchMedia("(prefers-color-scheme: dark)");
+      const listener = () => applyTheme();
+      mq.addEventListener("change", listener);
+      return () => mq.removeEventListener("change", listener);
+    }
+  }, [theme]);
 
   const columnCategories = ["Politics", "Stocks", "Economics"];
   const reportCategories = ["Company Analysis", "General Report"];
@@ -30,18 +63,27 @@ export function Navigation({ selectedCategory, onCategoryChange, onAdminClick, o
       if (reportsDropdownRef.current && !reportsDropdownRef.current.contains(event.target as Node)) {
         setShowReportsDropdown(false);
       }
+      if (settingsDropdownRef.current && !settingsDropdownRef.current.contains(event.target as Node)) {
+        setShowSettingsDropdown(false);
+      }
     };
 
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const themeOptions: { value: Theme; label: string; icon: any }[] = [
+    { value: "light", label: "Light", icon: Sun },
+    { value: "dark", label: "Dark", icon: Moon },
+    { value: "system", label: "System", icon: Monitor },
+  ];
+
   return (
-    <nav className="bg-white shadow-sm sticky top-0 z-50">
+    <nav className="bg-white dark:bg-slate-900 shadow-sm sticky top-0 z-50 border-b border-transparent dark:border-slate-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
-            <h1 className="text-slate-900 cursor-pointer" onClick={() => onCategoryChange("All")}>
+            <h1 className="text-slate-900 dark:text-slate-100 cursor-pointer" onClick={() => onCategoryChange("All")}>
               APERI
             </h1>
           </div>
@@ -52,8 +94,8 @@ export function Navigation({ selectedCategory, onCategoryChange, onAdminClick, o
               onClick={onCardNewsClick}
               className={`transition-colors ${
                 showCardNews
-                  ? "text-slate-900"
-                  : "text-slate-600 hover:text-slate-900"
+                  ? "text-slate-900 dark:text-slate-100"
+                  : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100"
               }`}
             >
               Daily Card News
@@ -64,8 +106,8 @@ export function Navigation({ selectedCategory, onCategoryChange, onAdminClick, o
                 onClick={() => setShowColumnsDropdown(!showColumnsDropdown)}
                 className={`flex items-center gap-1 transition-colors ${
                   columnCategories.includes(selectedCategory)
-                    ? "text-slate-900"
-                    : "text-slate-600 hover:text-slate-900"
+                    ? "text-slate-900 dark:text-slate-100"
+                    : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100"
                 }`}
               >
                 Columns
@@ -73,7 +115,7 @@ export function Navigation({ selectedCategory, onCategoryChange, onAdminClick, o
               </button>
 
               {showColumnsDropdown && (
-                <div className="absolute top-full left-0 mt-2 bg-white rounded-lg shadow-lg border border-slate-200 py-2 min-w-[160px] z-50">
+                <div className="absolute top-full left-0 mt-2 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700 py-2 min-w-[160px] z-50">
                   {columnCategories.map((category) => (
                     <button
                       key={category}
@@ -83,8 +125,8 @@ export function Navigation({ selectedCategory, onCategoryChange, onAdminClick, o
                       }}
                       className={`block w-full text-left px-4 py-2 transition-colors ${
                         selectedCategory === category
-                          ? "text-slate-900 bg-slate-100"
-                          : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+                          ? "text-slate-900 dark:text-slate-100 bg-slate-100 dark:bg-slate-700"
+                          : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-700/50"
                       }`}
                     >
                       {category}
@@ -99,8 +141,8 @@ export function Navigation({ selectedCategory, onCategoryChange, onAdminClick, o
                 onClick={() => setShowReportsDropdown(!showReportsDropdown)}
                 className={`flex items-center gap-1 transition-colors ${
                   showReports
-                    ? "text-slate-900"
-                    : "text-slate-600 hover:text-slate-900"
+                    ? "text-slate-900 dark:text-slate-100"
+                    : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100"
                 }`}
               >
                 Reports
@@ -108,7 +150,7 @@ export function Navigation({ selectedCategory, onCategoryChange, onAdminClick, o
               </button>
 
               {showReportsDropdown && (
-                <div className="absolute top-full left-0 mt-2 bg-white rounded-lg shadow-lg border border-slate-200 py-2 min-w-[180px] z-50">
+                <div className="absolute top-full left-0 mt-2 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700 py-2 min-w-[180px] z-50">
                   {reportCategories.map((category) => (
                     <button
                       key={category}
@@ -118,8 +160,8 @@ export function Navigation({ selectedCategory, onCategoryChange, onAdminClick, o
                       }}
                       className={`block w-full text-left px-4 py-2 transition-colors ${
                         selectedCategory === category
-                          ? "text-slate-900 bg-slate-100"
-                          : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+                          ? "text-slate-900 dark:text-slate-100 bg-slate-100 dark:bg-slate-700"
+                          : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-700/50"
                       }`}
                     >
                       {category}
@@ -131,11 +173,60 @@ export function Navigation({ selectedCategory, onCategoryChange, onAdminClick, o
           </div>
 
           <div className="hidden md:flex items-center gap-3">
-            <Button variant="ghost" size="sm" onClick={onAdminClick}>
-              <Settings className="w-4 h-4 mr-2" />
-              Admin
-            </Button>
+            {/* Settings (gear) dropdown — contains Theme + Admin */}
+            <div className="relative" ref={settingsDropdownRef}>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowSettingsDropdown(!showSettingsDropdown)}
+                aria-label="Settings"
+                className="px-2"
+              >
+                <Settings className="w-4 h-4" />
+              </Button>
+
+              {showSettingsDropdown && (
+                <div className="absolute top-full right-0 mt-2 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700 py-2 min-w-[200px] z-50">
+                  <div className="px-3 pt-1 pb-2 text-xs uppercase tracking-wide text-slate-400 dark:text-slate-500">
+                    Theme
+                  </div>
+                  {themeOptions.map(({ value, label, icon: Icon }) => (
+                    <button
+                      key={value}
+                      onClick={() => setTheme(value)}
+                      className={`flex items-center justify-between w-full px-4 py-2 transition-colors ${
+                        theme === value
+                          ? "text-slate-900 dark:text-slate-100 bg-slate-100 dark:bg-slate-700"
+                          : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-700/50"
+                      }`}
+                    >
+                      <span className="flex items-center gap-2">
+                        <Icon className="w-4 h-4" />
+                        {label}
+                      </span>
+                      {theme === value && <Check className="w-4 h-4" />}
+                    </button>
+                  ))}
+
+                  <div className="my-2 border-t border-slate-200 dark:border-slate-700" />
+
+                  <button
+                    onClick={() => {
+                      onAdminClick();
+                      setShowSettingsDropdown(false);
+                    }}
+                    className="flex items-center gap-2 w-full px-4 py-2 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
+                  >
+                    <Lock className="w-4 h-4" />
+                    Admin
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Subscribe — hidden until backend is wired up
             <Button variant="default" onClick={() => document.getElementById('subscribe-section')?.scrollIntoView({ behavior: 'smooth' })}>Subscribe</Button>
+            */}
           </div>
 
           {/* Mobile menu button */}
@@ -153,7 +244,7 @@ export function Navigation({ selectedCategory, onCategoryChange, onAdminClick, o
 
       {/* Mobile Navigation */}
       {isOpen && (
-        <div className="md:hidden border-t border-slate-200">
+        <div className="md:hidden border-t border-slate-200 dark:border-slate-700">
           <div className="px-4 pt-2 pb-4 space-y-2">
             <button
               onClick={() => {
@@ -162,15 +253,15 @@ export function Navigation({ selectedCategory, onCategoryChange, onAdminClick, o
               }}
               className={`block w-full text-left px-3 py-2 rounded-md ${
                 showCardNews
-                  ? "text-slate-900 bg-slate-100"
-                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+                  ? "text-slate-900 dark:text-slate-100 bg-slate-100 dark:bg-slate-700"
+                  : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-700/50"
               }`}
             >
               Daily Card News
             </button>
 
             <div className="py-1">
-              <div className="px-3 py-2 text-sm text-slate-900">Columns</div>
+              <div className="px-3 py-2 text-sm text-slate-900 dark:text-slate-100">Columns</div>
               {columnCategories.map((category) => (
                 <button
                   key={category}
@@ -180,8 +271,8 @@ export function Navigation({ selectedCategory, onCategoryChange, onAdminClick, o
                   }}
                   className={`block w-full text-left px-6 py-2 rounded-md ${
                     selectedCategory === category
-                      ? "text-slate-900 bg-slate-100"
-                      : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+                      ? "text-slate-900 dark:text-slate-100 bg-slate-100 dark:bg-slate-700"
+                      : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-700/50"
                   }`}
                 >
                   {category}
@@ -190,7 +281,7 @@ export function Navigation({ selectedCategory, onCategoryChange, onAdminClick, o
             </div>
 
             <div className="py-1">
-              <div className="px-3 py-2 text-sm text-slate-900">Reports</div>
+              <div className="px-3 py-2 text-sm text-slate-900 dark:text-slate-100">Reports</div>
               {reportCategories.map((category) => (
                 <button
                   key={category}
@@ -200,30 +291,60 @@ export function Navigation({ selectedCategory, onCategoryChange, onAdminClick, o
                   }}
                   className={`block w-full text-left px-6 py-2 rounded-md ${
                     selectedCategory === category
-                      ? "text-slate-900 bg-slate-100"
-                      : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+                      ? "text-slate-900 dark:text-slate-100 bg-slate-100 dark:bg-slate-700"
+                      : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-700/50"
                   }`}
                 >
                   {category}
                 </button>
               ))}
             </div>
-            <div className="pt-2 space-y-2">
-              <Button 
-                variant="ghost" 
-                className="w-full" 
+
+            {/* Mobile Settings section */}
+            <div className="py-1 border-t border-slate-200 dark:border-slate-700 mt-2 pt-2">
+              <div className="px-3 py-2 text-sm text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                <Settings className="w-4 h-4" />
+                Settings
+              </div>
+              <div className="px-3 pb-1 pt-1 text-xs uppercase tracking-wide text-slate-400 dark:text-slate-500">
+                Theme
+              </div>
+              {themeOptions.map(({ value, label, icon: Icon }) => (
+                <button
+                  key={value}
+                  onClick={() => setTheme(value)}
+                  className={`flex items-center justify-between w-full text-left px-6 py-2 rounded-md ${
+                    theme === value
+                      ? "text-slate-900 dark:text-slate-100 bg-slate-100 dark:bg-slate-700"
+                      : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-700/50"
+                  }`}
+                >
+                  <span className="flex items-center gap-2">
+                    <Icon className="w-4 h-4" />
+                    {label}
+                  </span>
+                  {theme === value && <Check className="w-4 h-4" />}
+                </button>
+              ))}
+              <button
                 onClick={() => {
                   onAdminClick();
                   setIsOpen(false);
                 }}
+                className="flex items-center gap-2 w-full text-left px-6 py-2 rounded-md text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-700/50 mt-1"
               >
-                <Settings className="w-4 h-4 mr-2" />
+                <Lock className="w-4 h-4" />
                 Admin
-              </Button>
+              </button>
+            </div>
+
+            {/* Subscribe (mobile) — hidden until backend is wired up
+            <div className="pt-2">
               <Button variant="default" className="w-full" onClick={() => { setIsOpen(false); setTimeout(() => document.getElementById('subscribe-section')?.scrollIntoView({ behavior: 'smooth' }), 100); }}>
                 Subscribe
               </Button>
             </div>
+            */}
           </div>
         </div>
       )}
