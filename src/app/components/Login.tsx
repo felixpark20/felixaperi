@@ -3,13 +3,14 @@ import { Button } from "./ui/button";
 import { Card } from "./ui/card";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
-import { Lock } from "lucide-react";
+import { Lock, ArrowLeft } from "lucide-react";
 
 interface LoginProps {
   onLogin: (password: string) => void;
+  onBack?: () => void;
 }
 
-export function Login({ onLogin }: LoginProps) {
+export function Login({ onLogin, onBack }: LoginProps) {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
@@ -28,7 +29,20 @@ export function Login({ onLogin }: LoginProps) {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4 dark:bg-slate-900">
+    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center px-4 dark:bg-slate-900">
+      {onBack && (
+        <div className="w-full max-w-md mb-4">
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={onBack}
+            className="text-slate-600 dark:text-slate-300"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to site
+          </Button>
+        </div>
+      )}
       <Card className="w-full max-w-md p-8">
         <div className="flex flex-col items-center mb-8">
           <div className="w-16 h-16 bg-slate-900 rounded-full flex items-center justify-center mb-4 dark:bg-slate-950">

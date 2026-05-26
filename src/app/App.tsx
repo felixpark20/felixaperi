@@ -11,6 +11,9 @@ import { CardNewsDetail } from "./components/CardNewsDetail";
 import { TodayCardNews } from "./components/TodayCardNews";
 import { Reports } from "./components/Reports";
 import { ReportDetail } from "./components/ReportDetail";
+import { MagazineGrid } from "./components/MagazineGrid";
+import { MagazineViewer } from "./components/MagazineViewer";
+import sampleMagazineHtml from "./data/sampleMagazine.html?raw";
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router";
 
@@ -283,6 +286,20 @@ const initialArticles = [
   },
 ];
 
+// Seeded sample magazine — shown locally / as fallback when the API is unavailable.
+// On the deployed site, real issues come from /api/magazines (uploaded via Admin).
+const initialMagazines = [
+  {
+    id: 1,
+    title: "이생 ISAENG — No.07",
+    subtitle: "매일의 발견",
+    date: "May 2026",
+    cover: "https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=600&q=80&auto=format&fit=crop",
+    html: sampleMagazineHtml,
+    views: 0,
+  },
+];
+
 export default function App() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -293,6 +310,7 @@ export default function App() {
   const [articles, setArticles] = useState<any[]>([]);
   const [cardNews, setCardNews] = useState<any[]>([]);
   const [reports, setReports] = useState<any[]>([]);
+  const [magazines, setMagazines] = useState<any[]>([]);
 
   // ---- URL ⇄ view mapping --------------------------------------
   // The URL is the single source of truth for which section + detail is shown.
@@ -300,7 +318,7 @@ export default function App() {
   const REPORT_SLUGS: Record<string, string> = { "company-analysis": "Company Analysis", "general-report": "General Report" };
   const slug = (s: string) => (s || "").toLowerCase().replace(/\s+/g, "-");
 
-  const { selectedCategory, showCardNews, cardId, articleId, reportId } = useMemo(() => {
+  const { selectedCategory, showCardNews, cardId, articleId, reportId, magazineId } = useMemo(() => {
     const segs = location.pathname.toLowerCase().replace(/\/+$/, "").split("/").filter(Boolean);
     const base = {
       selectedCategory: "",
@@ -308,6 +326,7 @@ export default function App() {
       cardId: null as number | null,
       articleId: null as number | null,
       reportId: null as number | null,
+      magazineId: null as number | null,
     };
     if (segs.length === 0) return base;
     if (segs[0] === "cardnews") {
@@ -318,6 +337,9 @@ export default function App() {
     }
     if (segs[0] === "reports") {
       return { ...base, selectedCategory: segs[1] ? (REPORT_SLUGS[segs[1]] ?? "Reports") : "Reports", reportId: segs[2] ? Number(segs[2]) : null };
+    }
+    if (segs[0] === "magazine") {
+      return { ...base, selectedCategory: "Magazine", magazineId: segs[1] ? Number(segs[1]) : null };
     }
     return base;
   }, [location.pathname]);
@@ -335,6 +357,10 @@ export default function App() {
     () => (reportId != null ? reports.find((r) => r.id === reportId) ?? null : null),
     [reportId, reports],
   );
+  const selectedMagazine = useMemo(
+    () => (magazineId != null ? magazines.find((m) => m.id === magazineId) ?? null : null),
+    [magazineId, magazines],
+  );
 
   const CATEGORY_TO_PATH: Record<string, string> = {
     "All": "/",
@@ -346,6 +372,7 @@ export default function App() {
     "Reports": "/reports",
     "Company Analysis": "/reports/company-analysis",
     "General Report": "/reports/general-report",
+    "Magazine": "/magazine",
   };
 
   // Navigate to a section by category name.
@@ -359,13 +386,17 @@ export default function App() {
       fetch('/api/articles').then(r => r.json()).catch(() => null),
       fetch('/api/cardnews').then(r => r.json()).catch(() => null),
       fetch('/api/reports').then(r => r.json()).catch(() => null),
-    ]).then(([fetchedArticles, fetchedCardNews, fetchedReports]) => {
+      fetch('/api/magazines').then(r => r.json()).catch(() => null),
+    ]).then(([fetchedArticles, fetchedCardNews, fetchedReports, fetchedMagazines]) => {
       setArticles(Array.isArray(fetchedArticles) ? fetchedArticles : initialArticles);
       setCardNews(fetchedCardNews || []);
       setReports(fetchedReports || []);
+      // Show seeded sample only when the API is unavailable (e.g. local dev); empty store stays empty.
+      setMagazines(Array.isArray(fetchedMagazines) ? fetchedMagazines : initialMagazines);
       setLoading(false);
     }).catch(() => {
       setArticles(initialArticles);
+      setMagazines(initialMagazines);
       setLoading(false);
     });
   }, []);
@@ -497,6 +528,44 @@ export default function App() {
     await fetch('/api/reports', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ids }) }).catch(console.error);
   };
 
+  const handleAddMagazine = async (magazineData: any) => {
+    if (magazineData.id) {
+      // Edit existing magazine
+      setMagazines(prev => prev.map(m => m.id === magazineData.id ? magazineData : m));
+      await fetch('/api/magazines', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(magazineData) }).catch(console.error);
+    } else {
+      const newMagazine = {
+        ...magazineData,
+        id: Date.now(),
+        date: magazineData.date || new Date().toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        }),
+        views: 0,
+      };
+      setMagazines(prev => [newMagazine, ...prev]);
+      await fetch('/api/magazines', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(newMagazine) }).catch(console.error);
+    }
+  };
+
+  const handleDeleteMagazine = async (id: number) => {
+    setMagazines(prev => prev.filter(m => m.id !== id));
+    await fetch(`/api/magazines?id=${id}`, { method: 'DELETE' }).catch(console.error);
+  };
+
+  const handleBulkDeleteMagazines = async (ids: number[]) => {
+    setMagazines(prev => prev.filter(m => !ids.includes(m.id)));
+    await fetch('/api/magazines', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ids }) }).catch(console.error);
+  };
+
+  const handleMagazineClick = (magazine: any) => {
+    const newViews = (magazine.views || 0) + 1;
+    setMagazines(prev => prev.map(m => m.id === magazine.id ? { ...m, views: newViews } : m));
+    fetch('/api/magazines', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: magazine.id, views: newViews }) }).catch(console.error);
+    navigate(`/magazine/${magazine.id}`);
+  };
+
   const handleCardClick = (card: any) => {
     const newViews = (card.views || 0) + 1;
     setCardNews(prev => prev.map(c => c.id === card.id ? { ...c, views: newViews } : c));
@@ -551,7 +620,7 @@ export default function App() {
   // Admin Panel View - Show login if not authenticated
   if (isAdmin) {
     if (!isAuthenticated) {
-      return <Login onLogin={handleLogin} />;
+      return <Login onLogin={handleLogin} onBack={() => setIsAdmin(false)} />;
     }
 
     return (
@@ -559,6 +628,7 @@ export default function App() {
         articles={articles}
         cardNews={cardNews}
         reports={reports}
+        magazines={magazines}
         onAddArticle={handleAddArticle}
         onEditArticle={handleEditArticle}
         onDeleteArticle={handleDeleteArticle}
@@ -570,6 +640,9 @@ export default function App() {
         onEditReport={handleEditReport}
         onDeleteReport={handleDeleteReport}
         onBulkDeleteReports={handleBulkDeleteReports}
+        onAddMagazine={handleAddMagazine}
+        onDeleteMagazine={handleDeleteMagazine}
+        onBulkDeleteMagazines={handleBulkDeleteMagazines}
         onBack={() => setIsAdmin(false)}
         onLogout={handleLogout}
       />
@@ -630,6 +703,61 @@ export default function App() {
     );
   }
 
+  // Magazine Viewer (single issue)
+  if (selectedMagazine) {
+    return (
+      <>
+        <Navigation
+          selectedCategory={selectedCategory}
+          onCategoryChange={goCategory}
+          onCardNewsClick={handleCardNewsClick}
+          onAdminClick={handleAdminClick}
+        />
+        <MagazineViewer
+          magazine={selectedMagazine}
+          onBack={() => navigate("/magazine")}
+        />
+      </>
+    );
+  }
+
+  // Magazine Grid View
+  if (selectedCategory === "Magazine") {
+    return (
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
+        <Navigation
+          selectedCategory={selectedCategory}
+          onCategoryChange={goCategory}
+          onCardNewsClick={handleCardNewsClick}
+          onAdminClick={handleAdminClick}
+        />
+
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="mb-8">
+            <h1 className="mb-2 text-slate-900 dark:text-slate-100">Magazine</h1>
+            <p className="text-slate-600 dark:text-slate-300">Read the latest issues. Click an issue to open it.</p>
+          </div>
+
+          <MagazineGrid
+            magazines={magazines}
+            onMagazineClick={handleMagazineClick}
+          />
+        </main>
+
+        <footer className="bg-slate-900 text-white mt-20 dark:bg-slate-950">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div><h3 className="mb-4">About</h3><p className="text-slate-400 dark:text-slate-500">In-depth analysis on politics, economics, and financial markets.</p></div>
+              <div><h3 className="mb-4">Categories</h3><ul className="space-y-2 text-slate-400 dark:text-slate-500"><li>Daily Card News</li><li>Columns — Politics / Stocks / Economics</li><li>Reports — Company Analysis / General Report</li><li>Magazine</li></ul></div>
+              <div><h3 className="mb-4">Connect</h3><p className="text-slate-400 dark:text-slate-500">Email Address:{" "}<a href="mailto:aperifelix@gmail.com" className="text-slate-200 hover:text-white transition-colors underline underline-offset-2 dark:text-slate-200 dark:hover:text-white">aperifelix@gmail.com</a></p></div>
+            </div>
+            <div className="border-t border-slate-800 mt-8 pt-8 text-center text-slate-400 dark:border-slate-700 dark:text-slate-500"><p>&copy; 2026 APERI. All rights reserved.</p></div>
+          </div>
+        </footer>
+      </div>
+    );
+  }
+
   // Card News Grid View
   if (showCardNews) {
     return (
@@ -677,8 +805,8 @@ export default function App() {
                 </p>
                 <p className="text-slate-400 dark:text-slate-500">
                   Email Address:{" "}
-                  <a href="mailto:itsautumn@snu.ac.kr" className="text-slate-200 hover:text-white transition-colors underline underline-offset-2 dark:text-slate-200 dark:hover:text-white">
-                    itsautumn@snu.ac.kr
+                  <a href="mailto:aperifelix@gmail.com" className="text-slate-200 hover:text-white transition-colors underline underline-offset-2 dark:text-slate-200 dark:hover:text-white">
+                    aperifelix@gmail.com
                   </a>
                 </p>
               </div>
@@ -721,7 +849,7 @@ export default function App() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div><h3 className="mb-4">About</h3><p className="text-slate-400 dark:text-slate-500">In-depth analysis on politics, economics, and financial markets.</p></div>
               <div><h3 className="mb-4">Categories</h3><ul className="space-y-2 text-slate-400 dark:text-slate-500"><li>Daily Card News</li><li>Columns — Politics / Stocks / Economics</li><li>Reports — Company Analysis / General Report</li></ul></div>
-              <div><h3 className="mb-4">Connect</h3><p className="text-slate-400 dark:text-slate-500">Email Address:{" "}<a href="mailto:itsautumn@snu.ac.kr" className="text-slate-200 hover:text-white transition-colors underline underline-offset-2 dark:text-slate-200 dark:hover:text-white">itsautumn@snu.ac.kr</a></p></div>
+              <div><h3 className="mb-4">Connect</h3><p className="text-slate-400 dark:text-slate-500">Email Address:{" "}<a href="mailto:aperifelix@gmail.com" className="text-slate-200 hover:text-white transition-colors underline underline-offset-2 dark:text-slate-200 dark:hover:text-white">aperifelix@gmail.com</a></p></div>
             </div>
             <div className="border-t border-slate-800 mt-8 pt-8 text-center text-slate-400 dark:border-slate-700 dark:text-slate-500"><p>&copy; 2026 APERI. All rights reserved.</p></div>
           </div>
@@ -772,8 +900,8 @@ export default function App() {
                 </p>
                 <p className="text-slate-400 dark:text-slate-500">
                   Email Address:{" "}
-                  <a href="mailto:itsautumn@snu.ac.kr" className="text-slate-200 hover:text-white transition-colors underline underline-offset-2 dark:text-slate-200 dark:hover:text-white">
-                    itsautumn@snu.ac.kr
+                  <a href="mailto:aperifelix@gmail.com" className="text-slate-200 hover:text-white transition-colors underline underline-offset-2 dark:text-slate-200 dark:hover:text-white">
+                    aperifelix@gmail.com
                   </a>
                 </p>
               </div>
@@ -834,7 +962,7 @@ export default function App() {
                         onError={e => { e.currentTarget.style.display="none"; }} />
                     )}
                     <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/50 to-transparent p-3">
-                      <span className={`text-xs font-medium px-2 py-1 rounded-full ${post.type === "report" ? "bg-blue-500 text-white" : "bg-white/90 text-slate-800 dark:text-slate-100"}`}>
+                      <span className={`text-xs font-medium px-2 py-1 rounded-full ${post.type === "report" ? "bg-blue-500 text-white" : "bg-white/90 text-slate-800"}`}>
                         {post.type === "report" ? "📊 " : "✍️ "}{post.category}
                       </span>
                     </div>
@@ -930,8 +1058,8 @@ export default function App() {
                 </p>
                 <p className="text-slate-400 dark:text-slate-500">
                   Email Address:{" "}
-                  <a href="mailto:itsautumn@snu.ac.kr" className="text-slate-200 hover:text-white transition-colors underline underline-offset-2 dark:text-slate-200 dark:hover:text-white">
-                    itsautumn@snu.ac.kr
+                  <a href="mailto:aperifelix@gmail.com" className="text-slate-200 hover:text-white transition-colors underline underline-offset-2 dark:text-slate-200 dark:hover:text-white">
+                    aperifelix@gmail.com
                   </a>
                 </p>
               </div>

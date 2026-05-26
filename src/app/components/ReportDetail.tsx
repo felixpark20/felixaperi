@@ -1,4 +1,4 @@
-import { ArrowLeft, Eye, Calendar, FileText } from "lucide-react";
+import { ArrowLeft, Eye, Calendar, FileText, ExternalLink, Download } from "lucide-react";
 import { Button } from "./ui/button";
 
 interface Report {
@@ -64,7 +64,35 @@ export function ReportDetail({ report, onBack }: ReportDetailProps) {
         </div>
 
         <div className="bg-white rounded-lg shadow-sm overflow-hidden dark:bg-slate-800">
-          <div className="w-full" style={{ height: 'calc(100vh - 160px)', minHeight: '900px' }}>
+          <div className="flex flex-wrap items-center justify-between gap-3 p-4 border-b border-slate-200 dark:border-slate-700">
+            <h3 className="text-slate-900 flex items-center gap-2 dark:text-slate-100">
+              <FileText className="w-5 h-5" />
+              PDF Report
+            </h3>
+            <div className="flex items-center gap-2">
+              <a
+                href={report.pdfUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm bg-slate-900 text-white hover:bg-slate-800 transition-colors dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white"
+              >
+                <ExternalLink className="w-4 h-4" />
+                새 탭에서 PDF 열기
+              </a>
+              <a
+                href={report.pdfUrl}
+                download={report.pdfName || `${report.title}.pdf`}
+                className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm border border-slate-300 text-slate-700 hover:bg-slate-100 transition-colors dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-700"
+              >
+                <Download className="w-4 h-4" />
+                다운로드
+              </a>
+            </div>
+          </div>
+          <p className="px-4 pt-3 text-xs text-slate-500 sm:hidden dark:text-slate-400">
+            PDF가 아래에 안 보이면 위 "새 탭에서 PDF 열기"를 눌러주세요.
+          </p>
+          <div className="w-full h-[80vh] sm:h-[900px]">
             <iframe
               src={report.pdfUrl}
               className="w-full h-full border-0"

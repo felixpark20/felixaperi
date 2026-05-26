@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
-import { Pencil, Trash2, Plus, LogOut, Eye, FileText, Image as ImageIcon, BookOpen } from "lucide-react";
+import { Pencil, Trash2, Plus, LogOut, Eye, FileText, Image as ImageIcon, BookOpen, Newspaper } from "lucide-react";
 import { ArticleEditor } from "./ArticleEditor";
 import { CardNewsUpload } from "./CardNewsUpload";
 import { ReportEditor } from "./ReportEditor";
+import { MagazineUpload } from "./MagazineUpload";
 
 interface Article {
   id: number;
@@ -41,10 +42,23 @@ interface Report {
   views?: number;
 }
 
+interface Magazine {
+  id: number;
+  title: string;
+  subtitle?: string;
+  date: string;
+  cover?: string;
+  html?: string;
+  pdfUrl?: string;
+  pdfName?: string;
+  views?: number;
+}
+
 interface AdminPanelProps {
   articles: Article[];
   cardNews: CardNews[];
   reports: Report[];
+  magazines: Magazine[];
   onAddArticle: (article: Omit<Article, 'id' | 'date'>) => void;
   onEditArticle: (article: Article) => void;
   onDeleteArticle: (id: number) => void;
@@ -56,15 +70,18 @@ interface AdminPanelProps {
   onEditReport: (report: Report) => void;
   onDeleteReport: (id: number) => void;
   onBulkDeleteReports: (ids: number[]) => void;
+  onAddMagazine: (magazine: any) => void;
+  onDeleteMagazine: (id: number) => void;
+  onBulkDeleteMagazines: (ids: number[]) => void;
   onBack: () => void;
   onLogout: () => void;
 }
 
-export function AdminPanel({ articles, cardNews, reports, onAddArticle, onEditArticle, onDeleteArticle, onBulkDeleteArticles, onAddCard, onDeleteCard, onBulkDeleteCards, onAddReport, onEditReport, onDeleteReport, onBulkDeleteReports, onBack, onLogout }: AdminPanelProps) {
+export function AdminPanel({ articles, cardNews, reports, magazines, onAddArticle, onEditArticle, onDeleteArticle, onBulkDeleteArticles, onAddCard, onDeleteCard, onBulkDeleteCards, onAddReport, onEditReport, onDeleteReport, onBulkDeleteReports, onAddMagazine, onDeleteMagazine, onBulkDeleteMagazines, onBack, onLogout }: AdminPanelProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editingArticle, setEditingArticle] = useState<Article | null>(null);
   const [editingReport, setEditingReport] = useState<Report | null>(null);
-  const [activeTab, setActiveTab] = useState<"articles" | "cardnews" | "reports">("articles");
+  const [activeTab, setActiveTab] = useState<"articles" | "cardnews" | "reports" | "magazines">("articles");
   const [selectedArticles, setSelectedArticles] = useState<number[]>([]);
   const [selectedReports, setSelectedReports] = useState<number[]>([]);
 
@@ -233,6 +250,19 @@ export function AdminPanel({ articles, cardNews, reports, onAddArticle, onEditAr
                 Reports ({reports.length})
               </div>
             </button>
+            <button
+              onClick={() => setActiveTab("magazines")}
+              className={`px-4 py-2 -mb-px border-b-2 transition-colors ${
+                activeTab === "magazines"
+                  ? "border-slate-900 text-slate-900 dark:text-slate-100"
+                  : "border-transparent text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-slate-100"
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <Newspaper className="w-4 h-4" />
+                Magazine ({magazines.length})
+              </div>
+            </button>
           </div>
         </div>
       </div>
@@ -333,6 +363,13 @@ export function AdminPanel({ articles, cardNews, reports, onAddArticle, onEditAr
             onAddCard={onAddCard}
             onDeleteCard={onDeleteCard}
             onBulkDelete={onBulkDeleteCards}
+          />
+        ) : activeTab === "magazines" ? (
+          <MagazineUpload
+            magazines={magazines}
+            onAddMagazine={onAddMagazine}
+            onDeleteMagazine={onDeleteMagazine}
+            onBulkDelete={onBulkDeleteMagazines}
           />
         ) : (
           <div>
