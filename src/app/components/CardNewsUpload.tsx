@@ -115,15 +115,23 @@ export function CardNewsUpload({ cardNews, onAddCard, onDeleteCard, onBulkDelete
     reader.readAsDataURL(file);
   };
 
-  const handleEditCard = (card: CardNews) => {
-    setEditingCard(card);
-    // Try to reverse-parse date from title, fall back to today
-    setSelectedDate(new Date().toISOString().split("T")[0]);
-    setImages(card.images || []);
-    setPdfUrl(card.pdfUrl || "");
-    setPdfName(card.pdfName || "");
-    setIsUploading(true);
+  const handleEditCard = async (card: CardNews) => {
     setSelectedCards([]);
+    // Fetch full card (with images) from detail API, since slim list has no images
+    let fullCard = card;
+    try {
+      const r = await fetch(`/api/cardnews-detail/${card.id}`);
+      if (r.ok) {
+        const data = await r.json();
+        if (data) fullCard = data;
+      }
+    } catch (_) { /* fall back to slim card */ }
+    setEditingCard(fullCard);
+    setSelectedDate(new Date().toISOString().split("T")[0]);
+    setImages(fullCard.images || []);
+    setPdfUrl(fullCard.pdfUrl || "");
+    setPdfName(fullCard.pdfName || "");
+    setIsUploading(true);
   };
 
   const toggleCardSelection = (id: number) => {
