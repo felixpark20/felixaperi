@@ -33,7 +33,7 @@ export function CardNewsGrid({ cardNews, onCardClick }: CardNewsGridProps) {
         >
           <div className="aspect-square bg-slate-100 overflow-hidden relative dark:bg-slate-700">
             <img
-              src={(card.images || [])[0]}
+              src={card.thumbnail || (card.images || [])[0]}
               alt={card.title}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
             />

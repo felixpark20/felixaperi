@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ArrowLeft, Eye, Calendar, ChevronLeft, ChevronRight, FileText, ExternalLink, Download } from "lucide-react";
 import { Button } from "./ui/button";
 
@@ -19,7 +19,24 @@ interface CardNewsDetailProps {
 
 export function CardNewsDetail({ card, onBack }: CardNewsDetailProps) {
   const [currentPage, setCurrentPage] = useState(0);
-  const images = card.images || [];
+  const [fullCard, setFullCard] = useState<CardNews | null>(null);
+  const [loadingDetail, setLoadingDetail] = useState(false);
+
+  // If slim list card has no images, fetch full card data lazily
+  useEffect(() => {
+    const hasImages = (card.images || []).length > 0;
+    if (!hasImages && card.id) {
+      setLoadingDetail(true);
+      fetch(`/api/cardnews-detail/${card.id}`)
+        .then(r => r.json())
+        .then(data => { if (data) setFullCard(data); })
+        .catch(() => null)
+        .finally(() => setLoadingDetail(false));
+    }
+  }, [card.id]);
+
+  const activeCard = fullCard ?? card;
+  const images = activeCard.images || [];
   const totalPages = images.length;
 
   const goToNextPage = () => {
@@ -44,13 +61,15 @@ export function CardNewsDetail({ card, onBack }: CardNewsDetailProps) {
 
         <div className="bg-white rounded-lg shadow-sm overflow-hidden dark:bg-slate-800">
           <div className="relative aspect-square max-h-[600px] bg-slate-100 overflow-hidden mx-auto dark:bg-slate-700">
-            {images.length > 0 && (
+            {loadingDetail ? (
+              <div className="w-full h-full flex items-center justify-center text-slate-400">Loading…</div>
+            ) : images.length > 0 ? (
               <img
                 src={images[currentPage]}
-                alt={`${card.title} - Page ${currentPage + 1}`}
+                alt={`${activeCard.title} - Page ${currentPage + 1}`}
                 className="w-full h-full object-contain"
               />
-            )}
+            ) : null}
 
             {totalPages > 1 && (
               <>
@@ -99,20 +118,20 @@ export function CardNewsDetail({ card, onBack }: CardNewsDetailProps) {
           )}
 
           <div className="p-6 border-t border-slate-200 dark:border-slate-700">
-            <h1 className="mb-4 text-slate-900 dark:text-slate-100">{card.title}</h1>
+            <h1 className="mb-4 text-slate-900 dark:text-slate-100">{activeCard.title}</h1>
 
             <div className="flex flex-wrap gap-4 text-sm text-slate-600 dark:text-slate-300">
               <div className="flex items-center gap-2">
                 <Calendar className="w-4 h-4" />
-                <span>{card.date}</span>
+                <span>{activeCard.date}</span>
               </div>
-              {card.views !== undefined && (
+              {activeCard.views !== undefined && (
                 <div className="flex items-center gap-2">
                   <Eye className="w-4 h-4" />
-                  <span>{card.views.toLocaleString()} views</span>
+                  <span>{activeCard.views.toLocaleString()} views</span>
                 </div>
               )}
-              {card.pdfUrl && (
+              {activeCard.pdfUrl && (
                 <div className="flex items-center gap-2">
                   <FileText className="w-4 h-4" />
                   <span>Detailed PDF Report Available</span>
@@ -122,7 +141,7 @@ export function CardNewsDetail({ card, onBack }: CardNewsDetailProps) {
           </div>
         </div>
 
-        {card.pdfUrl && (
+        {activeCard.pdfUrl && (
           <div className="mt-8 bg-white rounded-lg shadow-sm overflow-hidden dark:bg-slate-800">
             <div className="p-4 bg-slate-100 border-b border-slate-200 dark:bg-slate-700 dark:border-slate-700">
               <div className="flex flex-wrap items-center justify-between gap-3">
@@ -132,12 +151,12 @@ export function CardNewsDetail({ card, onBack }: CardNewsDetailProps) {
                     Detailed Report
                   </h3>
                   <p className="text-sm text-slate-600 mt-1 dark:text-slate-300">
-                    {card.pdfName || 'Full report in PDF format'}
+                    {activeCard.pdfName || 'Full report in PDF format'}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
                   <a
-                    href={card.pdfUrl}
+                    href={activeCard.pdfUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm bg-slate-900 text-white hover:bg-slate-800 transition-colors dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white"
@@ -146,8 +165,8 @@ export function CardNewsDetail({ card, onBack }: CardNewsDetailProps) {
                     새 탭에서 열기
                   </a>
                   <a
-                    href={card.pdfUrl}
-                    download={card.pdfName || `${card.title}.pdf`}
+                    href={activeCard.pdfUrl}
+                    download={activeCard.pdfName || `${activeCard.title}.pdf`}
                     className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm border border-slate-300 text-slate-700 hover:bg-white transition-colors dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-600"
                   >
                     <Download className="w-4 h-4" />
@@ -161,9 +180,9 @@ export function CardNewsDetail({ card, onBack }: CardNewsDetailProps) {
             </div>
             <div className="w-full h-[75vh] sm:h-[800px]">
               <iframe
-                src={card.pdfUrl}
+                src={activeCard.pdfUrl}
                 className="w-full h-full border-0"
-                title={`${card.title} - PDF Report`}
+                title={`${activeCard.title} - PDF Report`}
               />
             </div>
           </div>
