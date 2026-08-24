@@ -26,15 +26,13 @@ export default async () => {
       // Save full card (images + pdf) in its own blob
       await store.set(`card-${card.id}`, JSON.stringify(card));
 
-      // Build slim entry: keep only first image as thumbnail
-      const thumbnail = (card.images || [])[0] ?? null;
+      // Slim entry: metadata only — no images or PDF data
       slimList.push({
         id: card.id,
         title: card.title,
         date: card.date,
         views: card.views ?? 0,
         pdfName: card.pdfName ?? null,
-        thumbnail,
       });
 
       console.log(`[migrate] Saved card ${card.id}`);

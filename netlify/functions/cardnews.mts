@@ -1,14 +1,13 @@
 import type { Config } from "@netlify/functions";
 import { getStore } from "@netlify/blobs";
 
-// Helper: build a slim entry from a full card (for list-slim)
+// Helper: build a slim entry from a full card (no images — just metadata)
 const toSlim = (card: any) => ({
   id: card.id,
   title: card.title,
   date: card.date,
   views: card.views ?? 0,
   pdfName: card.pdfName ?? null,
-  thumbnail: (card.images || [])[0] ?? null,
 });
 
 export default async (req: Request) => {

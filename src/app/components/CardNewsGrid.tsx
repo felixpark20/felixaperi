@@ -1,6 +1,13 @@
+// Pastel palette for cards without a loaded thumbnail
+const PASTEL_COLORS = [
+  "#FFD6D6", "#FFE8CC", "#FFF3CC", "#D6F5D6",
+  "#CCF0FF", "#D6CCFF", "#FFD6F5", "#D6EAF8",
+];
+
 interface CardNews {
   id: number;
   images: string[];
+  thumbnail?: string;
   title: string;
   date: string;
   pdfUrl?: string;
@@ -25,24 +32,32 @@ export function CardNewsGrid({ cardNews, onCardClick }: CardNewsGridProps) {
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      {cardNews.map((card) => (
+      {cardNews.map((card) => {
+        const imageSrc = card.thumbnail || (card.images || [])[0];
+        const pastelColor = PASTEL_COLORS[card.id % PASTEL_COLORS.length];
+
+        return (
         <div
           key={card.id}
           onClick={() => onCardClick(card)}
           className="group cursor-pointer bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 dark:bg-slate-800"
         >
-          <div className="aspect-square bg-slate-100 overflow-hidden relative dark:bg-slate-700">
-            <img
-              src={card.thumbnail || (card.images || [])[0]}
-              alt={card.title}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-            />
-            {(card.images || []).length > 0 && (
-              <div className="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
-                {(card.images || []).length} pages
+          <div
+            className="aspect-square overflow-hidden relative"
+            style={imageSrc ? {} : { backgroundColor: pastelColor }}
+          >
+            {imageSrc ? (
+              <img
+                src={imageSrc}
+                alt={card.title}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              />
+            ) : (
+              <div className="w-full h-full flex items-end p-3">
+                <span className="text-slate-700 font-medium text-sm line-clamp-3">{card.title}</span>
               </div>
             )}
-            {card.pdfUrl && (
+            {card.pdfName && (
               <div className="absolute top-2 left-2 bg-blue-600 text-white text-xs px-2 py-1 rounded">
                 PDF
               </div>
@@ -58,7 +73,8 @@ export function CardNewsGrid({ cardNews, onCardClick }: CardNewsGridProps) {
             </div>
           </div>
         </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
