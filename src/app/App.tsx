@@ -382,11 +382,17 @@ export default function App() {
 
   // Fetch data from API on mount
   useEffect(() => {
+    const fetchWithTimeout = (url: string, ms = 9000) => {
+      const controller = new AbortController();
+      const id = setTimeout(() => controller.abort(), ms);
+      return fetch(url, { signal: controller.signal })
+        .finally(() => clearTimeout(id));
+    };
     Promise.all([
-      fetch('/api/articles').then(r => r.json()).catch(() => null),
-      fetch('/api/cardnews').then(r => r.json()).catch(() => null),
-      fetch('/api/reports').then(r => r.json()).catch(() => null),
-      fetch('/api/magazines').then(r => r.json()).catch(() => null),
+      fetchWithTimeout('/api/articles').then(r => r.json()).catch(() => null),
+      fetchWithTimeout('/api/cardnews').then(r => r.json()).catch(() => null),
+      fetchWithTimeout('/api/reports').then(r => r.json()).catch(() => null),
+      fetchWithTimeout('/api/magazines').then(r => r.json()).catch(() => null),
     ]).then(([fetchedArticles, fetchedCardNews, fetchedReports, fetchedMagazines]) => {
       setArticles(Array.isArray(fetchedArticles) ? fetchedArticles : initialArticles);
       setCardNews(fetchedCardNews || []);
