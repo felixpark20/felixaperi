@@ -1,8 +1,16 @@
+import { useState, useEffect } from "react";
 import { Calendar, Eye } from "lucide-react";
+
+// Same palette as CardNewsGrid — keeps placeholders consistent across the site
+const PASTEL_COLORS = [
+  "#FFD6D6", "#FFE8CC", "#FFF3CC", "#D6F5D6",
+  "#CCF0FF", "#D6CCFF", "#FFD6F5", "#D6EAF8",
+];
 
 interface CardNews {
   id: number;
   images: string[];
+  thumbnail?: string;
   title: string;
   date: string;
   pdfUrl?: string;
@@ -34,7 +42,44 @@ export function TodayCardNews({ cardNews, onCardClick }: TodayCardNewsProps) {
   // Show the single most recent card news by the date in its title
   const latestCard = [...cardNews].sort((a, b) => parseCardSortKey(b) - parseCardSortKey(a))[0];
 
+  // The list endpoint returns slim cards (no images), so fetch just the
+  // cover image for this one card. `?thumb=1` returns the first image only —
+  // never the full multi-MB card payload.
+  const [thumb, setThumb] = useState<string | null>(null);
+  const [pageCount, setPageCount] = useState(0);
+
+  const localSrc = latestCard?.thumbnail || (latestCard?.images || [])[0];
+
+  useEffect(() => {
+    setThumb(null);
+    setPageCount((latestCard?.images || []).length);
+    if (!latestCard || localSrc) return;
+
+    let cancelled = false;
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 9000);
+
+    fetch(`/api/cardnews-detail/${latestCard.id}?thumb=1`, { signal: ctrl.signal })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (cancelled || !d) return;
+        if (d.thumbnail) setThumb(d.thumbnail);
+        if (typeof d.pages === "number") setPageCount(d.pages);
+      })
+      .catch(() => { /* placeholder stays */ })
+      .finally(() => clearTimeout(timer));
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+      ctrl.abort();
+    };
+  }, [latestCard?.id, localSrc]);
+
   if (!latestCard) return null;
+
+  const imageSrc = localSrc || thumb;
+  const pastelColor = PASTEL_COLORS[latestCard.id % PASTEL_COLORS.length];
 
   return (
     <section className="h-full flex flex-col">
@@ -47,18 +92,30 @@ export function TodayCardNews({ cardNews, onCardClick }: TodayCardNewsProps) {
         onClick={() => onCardClick(latestCard)}
         className="group cursor-pointer bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 flex-1 flex flex-col dark:bg-slate-800"
       >
-        <div className="aspect-square bg-slate-100 overflow-hidden relative dark:bg-slate-700">
-          <img
-            src={(latestCard.images || [])[0]}
-            alt={latestCard.title}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-          />
-          {(latestCard.images || []).length > 0 && (
-            <div className="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
-              {(latestCard.images || []).length} pages
+        <div
+          className="aspect-square overflow-hidden relative"
+          style={{ backgroundColor: pastelColor }}
+        >
+          {imageSrc ? (
+            <img
+              src={imageSrc}
+              alt={latestCard.title}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              onError={(e) => { e.currentTarget.style.display = "none"; }}
+            />
+          ) : (
+            // No image yet (still loading, or the fetch failed) — show the
+            // title on a pastel tile instead of a broken image icon
+            <div className="w-full h-full flex items-end p-4">
+              <span className="text-slate-700 font-medium line-clamp-3">{latestCard.title}</span>
             </div>
           )}
-          {latestCard.pdfUrl && (
+          {pageCount > 0 && (
+            <div className="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+              {pageCount} pages
+            </div>
+          )}
+          {(latestCard.pdfUrl || latestCard.pdfName) && (
             <div className="absolute top-2 left-2 bg-blue-600 text-white text-xs px-2 py-1 rounded">
               PDF
             </div>

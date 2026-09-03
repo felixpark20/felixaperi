@@ -1,5 +1,6 @@
 import { ArrowLeft, Eye, Calendar, FileText, ExternalLink, Download } from "lucide-react";
 import { Button } from "./ui/button";
+import { useBlobUrl } from "../hooks/useBlobUrl";
 
 interface Report {
   id: number;
@@ -19,7 +20,10 @@ interface ReportDetailProps {
   onBack: () => void;
 }
 
+
 export function ReportDetail({ report, onBack }: ReportDetailProps) {
+  const iframeSrc = useBlobUrl(report.pdfUrl);
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -71,7 +75,7 @@ export function ReportDetail({ report, onBack }: ReportDetailProps) {
             </h3>
             <div className="flex items-center gap-2">
               <a
-                href={report.pdfUrl}
+                href={iframeSrc || report.pdfUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm bg-slate-900 text-white hover:bg-slate-800 transition-colors dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white"
@@ -80,7 +84,7 @@ export function ReportDetail({ report, onBack }: ReportDetailProps) {
                 새 탭에서 PDF 열기
               </a>
               <a
-                href={report.pdfUrl}
+                href={iframeSrc || report.pdfUrl}
                 download={report.pdfName || `${report.title}.pdf`}
                 className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm border border-slate-300 text-slate-700 hover:bg-slate-100 transition-colors dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-700"
               >
@@ -93,11 +97,17 @@ export function ReportDetail({ report, onBack }: ReportDetailProps) {
             PDF가 아래에 안 보이면 위 "새 탭에서 PDF 열기"를 눌러주세요.
           </p>
           <div className="w-full h-[80vh] sm:h-[900px]">
-            <iframe
-              src={report.pdfUrl}
-              className="w-full h-full border-0"
-              title={report.title}
-            />
+            {iframeSrc ? (
+              <iframe
+                src={iframeSrc}
+                className="w-full h-full border-0"
+                title={report.title}
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-slate-400 text-sm">
+                PDF 로딩 중…
+              </div>
+            )}
           </div>
         </div>
       </div>

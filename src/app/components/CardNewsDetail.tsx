@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { ArrowLeft, Eye, Calendar, ChevronLeft, ChevronRight, FileText, ExternalLink, Download } from "lucide-react";
 import { Button } from "./ui/button";
+import { useBlobUrl } from "../hooks/useBlobUrl";
 
 interface CardNews {
   id: number;
@@ -21,6 +22,8 @@ export function CardNewsDetail({ card, onBack }: CardNewsDetailProps) {
   const [currentPage, setCurrentPage] = useState(0);
   const [fullCard, setFullCard] = useState<CardNews | null>(null);
   const [loadingDetail, setLoadingDetail] = useState(false);
+  const activeCard = fullCard ?? card;
+  const pdfSrc = useBlobUrl(activeCard.pdfUrl);
 
   // If slim list card has no images, fetch full card data lazily
   useEffect(() => {
@@ -35,7 +38,6 @@ export function CardNewsDetail({ card, onBack }: CardNewsDetailProps) {
     }
   }, [card.id]);
 
-  const activeCard = fullCard ?? card;
   const images = activeCard.images || [];
   const totalPages = images.length;
 
@@ -156,7 +158,7 @@ export function CardNewsDetail({ card, onBack }: CardNewsDetailProps) {
                 </div>
                 <div className="flex items-center gap-2">
                   <a
-                    href={activeCard.pdfUrl}
+                    href={pdfSrc || activeCard.pdfUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm bg-slate-900 text-white hover:bg-slate-800 transition-colors dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white"
@@ -165,7 +167,7 @@ export function CardNewsDetail({ card, onBack }: CardNewsDetailProps) {
                     새 탭에서 열기
                   </a>
                   <a
-                    href={activeCard.pdfUrl}
+                    href={pdfSrc || activeCard.pdfUrl}
                     download={activeCard.pdfName || `${activeCard.title}.pdf`}
                     className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm border border-slate-300 text-slate-700 hover:bg-white transition-colors dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-600"
                   >
@@ -179,11 +181,17 @@ export function CardNewsDetail({ card, onBack }: CardNewsDetailProps) {
               </p>
             </div>
             <div className="w-full h-[75vh] sm:h-[800px]">
-              <iframe
-                src={activeCard.pdfUrl}
-                className="w-full h-full border-0"
-                title={`${activeCard.title} - PDF Report`}
-              />
+              {pdfSrc ? (
+                <iframe
+                  src={pdfSrc}
+                  className="w-full h-full border-0"
+                  title={`${activeCard.title} - PDF Report`}
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-slate-400 text-sm">
+                  PDF 로딩 중…
+                </div>
+              )}
             </div>
           </div>
         )}
